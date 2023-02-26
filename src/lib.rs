@@ -1,6 +1,8 @@
 mod utils;
 mod fn_extensions;
 mod single_pixel_transformation;
+mod histogram;
+mod convolution;
 
 use wasm_bindgen::prelude::*;
 

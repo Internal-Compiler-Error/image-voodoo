@@ -59,7 +59,7 @@ impl CanvasImage<'_> {
     }
 }
 
-trait ZeroPaddedImage {
+pub trait ZeroPaddedImage {
     fn r(&self, x: i32, y: i32) -> u8;
     fn g(&self, x: i32, y: i32) -> u8;
     fn b(&self, x: i32, y: i32) -> u8;
@@ -213,6 +213,7 @@ pub fn circular_indexed<'a, F, C>(f: &'a F, x_period: C, y_period: C) -> impl Fn
         f(x, y).unwrap()
     }
 }
+
 
 // /// Given a image that is only defined on a finite domain, this function will return a function that
 // /// returns the value of the image at the given point. If the point is outside the domain, the
