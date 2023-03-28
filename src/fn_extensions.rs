@@ -11,6 +11,34 @@ pub struct CanvasImage<'a> {
     _marker: PhantomData<&'a ImageData>,
 }
 
+/// An iterator over the RGBA values of an image. Goes from left to right, top to bottom.
+pub struct RBGAIterator<'a> {
+    image: &'a CanvasImage<'a>,
+    /// The current x position, we should read from this before incrementing it.
+    x: u32,
+    /// The current y position, we should read from this before incrementing it.
+    y: u32,
+}
+
+impl Iterator for RBGAIterator<'_> {
+    type Item = (u8, u8, u8, u8);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let r = self.image.r(self.x, self.y)?;
+        let g = self.image.g(self.x, self.y)?;
+        let b = self.image.b(self.x, self.y)?;
+        let a = self.image.a(self.x, self.y)?;
+
+        self.x += 1;
+        if self.x >= self.image.width {
+            self.x = 0;
+            self.y += 1;
+        }
+
+        Some((r, g, b, a))
+    }
+}
+
 impl CanvasImage<'_> {
     pub fn new(image_data: &ImageData) -> CanvasImage {
         CanvasImage {
