@@ -1,5 +1,9 @@
+use std::convert::TryFrom;
+use std::fmt::Debug;
 use std::marker::PhantomData;
-use num_traits::int::PrimInt;
+use num::{Integer, Signed};
+use num::integer::div_floor;
+use num::abs;
 use wasm_bindgen::Clamped;
 use web_sys::ImageData;
 use crate::histogram::Histogram;
@@ -213,12 +217,15 @@ impl CircularIndexedImage for CanvasImage<'_> {
             return 0;
         }
 
-        let x = x as u32;
-        let y = y as u32;
+
+        let width = self.width();
+        let height = self.height();
 
         let f = |x, y| self.r(x, y);
-        let f = circular_indexed(&f, self.width, self.height);
-        f(x, y)
+
+
+        let value = circular_indexed(&f, width, height)(x, y);
+        value
     }
 
     fn g(&self, x: i32, y: i32) -> u8 {
@@ -226,8 +233,6 @@ impl CircularIndexedImage for CanvasImage<'_> {
             return 0;
         }
 
-        let x = x as u32;
-        let y = y as u32;
 
         let f = |x, y| self.g(x, y);
         let f = circular_indexed(&f, self.width, self.height);
@@ -239,8 +244,6 @@ impl CircularIndexedImage for CanvasImage<'_> {
             return 0;
         }
 
-        let x = x as u32;
-        let y = y as u32;
 
         let f = |x, y| self.b(x, y);
         let f = circular_indexed(&f, self.width, self.height);
@@ -251,9 +254,6 @@ impl CircularIndexedImage for CanvasImage<'_> {
         if x < 0 || y < 0 {
             return 0;
         }
-
-        let x = x as u32;
-        let y = y as u32;
 
         let f = |x, y| self.a(x, y);
         let f = circular_indexed(&f, self.width, self.height);
@@ -335,35 +335,97 @@ pub fn zero_padded<'a, F, C>(f: &'a F) -> impl Fn(C, C) -> u8 + 'a
 /// Given a image that is only defined on a finite domain, this function will return a function that
 /// returns the value of the image at the given point. If the point is outside the domain, the
 /// function will return the value of the image at the corresponding point in the domain.
-pub fn circular_indexed<'a, F, C>(f: &'a F, x_period: C, y_period: C) -> impl Fn(C, C) -> u8 + 'a
-    where F: Fn(C, C) -> Option<u8>,
-          C: PrimInt + 'static
+pub fn circular_indexed<'a, F, U, S>(f: &'a F, x_period: U, y_period: U) -> impl Fn(S, S) -> u8 + 'a
+// I am really only interested in the primitive types, so the Copy bound is fine
+    where F: Fn(U, U) -> Option<u8>,
+          U: Integer + Copy + TryFrom<S> + 'static,
+          S: Integer + Copy + Signed,
+          <U as TryFrom<S>>::Error: Debug
 {
-    move |x, y| {
-        let x = x % x_period;
-        let y = y % y_period;
+    let unsigned_abs = |x: S| {
+        let value = U::try_from(abs(x)).unwrap();
+        value
+    };
 
-        // by taking the modulus, we will be inside the domain of definition
-        f(x, y).unwrap()
+    move |x, y| {
+        // can't believe copilot actually suggested this, but I guess it works
+        let zero = U::zero();
+
+        let x_offset: U = unsigned_abs(x) % x_period;
+
+        let y_offset: U = unsigned_abs(y) % y_period;
+
+
+        let x_extra_period: U = if x.is_negative() { x_period } else { zero };
+        let y_extra_period: U = if y.is_negative() { y_period } else { zero };
+
+
+        let x = if x.is_negative() {
+            x_period + x_extra_period - x_offset
+        } else {
+            x_period + x_extra_period + x_offset
+        };
+        let y = if y.is_negative() {
+            y_period + y_extra_period - y_offset
+        } else {
+            y_period + y_extra_period + y_offset
+        };
+
+
+        f(x % x_period, y % y_period).unwrap()
     }
 }
 
 
-// /// Given a image that is only defined on a finite domain, this function will return a function that
-// /// returns the value of the image at the given point. If the point is outside the domain, the
-// /// function will return the value reflected across the boundary of the domain.
-// pub fn reflective_indexed<'a, F>(f: &'a F, x_period: i32, y_period: i32) -> impl Fn(i32, i32) -> u8 + 'a
-//     where F: Fn(i32, i32) -> Option<u8>,
-// {
-//     // move |x: i32, y: i32| {
-//     //     let x = x_period - (x % x_period).abs();
-//     //     let y = y_period - (y % y_period).abs();
-//     //
-//     //     // by taking the modulus, we will be inside the domain of definition
-//     //     f(x, y).unwrap()
-//     // };
-//     todo!()
-// }
+/// Given a image that is only defined on a finite domain, this function will return a function that
+/// returns the value of the image at the given point. If the point is outside the domain, the
+/// function will return the value reflected across the boundary of the domain.
+pub fn reflective_indexed<'a, F, U, S>(f: &'a F, x_period: U, y_period: U) -> impl Fn(S, S) -> u8 + 'a
+    where F: Fn(U, U) -> Option<u8>,
+          U: Integer + Copy + TryFrom<S> + 'static,
+          S: Integer + Copy + Signed + 'static,
+          <U as TryFrom<S>>::Error: Debug {
+    let unsigned_abs = |x: S| {
+        U::try_from(abs(x)).unwrap()
+    };
+
+
+    move |x, y| {
+        let zero = U::zero();
+        let x_floored_period = div_floor(unsigned_abs(x), x_period);
+        let y_floored_period = div_floor(unsigned_abs(y), y_period);
+
+        let x_offset = unsigned_abs(x) % x_period;
+        let y_offset = unsigned_abs(y) % y_period;
+
+
+        let x_base: U = if x_floored_period.is_even() {
+            zero
+        } else {
+            x_period
+        };
+
+        let y_base = if y_floored_period.is_even() {
+            zero
+        } else {
+            y_period
+        };
+
+        let x = if x_floored_period.is_even() {
+            x_base + x_offset
+        } else {
+            x_base - x_offset
+        };
+
+        let y = if y_floored_period.is_even() {
+            y_base + y_offset
+        } else {
+            y_base - y_offset
+        };
+
+        f(x % x_period, y % y_period).unwrap()
+    }
+}
 
 #[cfg(test)]
 mod test {
