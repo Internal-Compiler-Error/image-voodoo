@@ -84,6 +84,8 @@ impl Kernel {
     }
 }
 
+/// Convert from the kernel view of index that goes from the center to the edges to the actual
+/// index in the data array.
 impl ops::Index<(isize, isize)> for Kernel {
     type Output = f64;
 
