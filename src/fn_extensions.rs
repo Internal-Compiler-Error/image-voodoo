@@ -2,6 +2,7 @@ use std::marker::PhantomData;
 use num_traits::int::PrimInt;
 use wasm_bindgen::Clamped;
 use web_sys::ImageData;
+use crate::histogram::Histogram;
 
 pub struct CanvasImage<'a> {
     data: Clamped<Vec<u8>>,
@@ -66,6 +67,8 @@ impl Iterator for RBGAIterator<'_> {
 }
 
 impl CanvasImage<'_> {
+    /**************************** random junk **************************************/
+
     pub fn new(image_data: &ImageData) -> CanvasImage {
         CanvasImage {
             data: image_data.data(),
@@ -74,6 +77,16 @@ impl CanvasImage<'_> {
             _marker: PhantomData,
         }
     }
+
+    pub fn width(&self) -> u32 {
+        self.width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.height
+    }
+
+    /**************************** single pixel accessors ****************************/
 
     pub fn r(&self, x: u32, y: u32) -> Option<u8> {
         let offset = 4 * (y * self.width + x) as usize;
@@ -104,13 +117,7 @@ impl CanvasImage<'_> {
         }
     }
 
-    pub fn width(&self) -> u32 {
-        self.width
-    }
-
-    pub fn height(&self) -> u32 {
-        self.height
-    }
+    /**************************** intensity iterators ****************************/
 
     /// returns an iterator over the RGBA values of the image
     pub fn rgba_iter(&self) -> RBGAIterator {
@@ -159,6 +166,30 @@ impl CanvasImage<'_> {
             y: 0,
             offset: 3,
         }
+    }
+
+
+    /***************************** histograms *********************************/
+    pub fn blue_histogram(&self) -> Histogram {
+        let mut b_channel = self.b_iter();
+        Histogram::from_channel_iterator(&mut b_channel)
+    }
+
+    pub fn green_histogram(&self) -> Histogram {
+        let mut g_channel = self.g_iter();
+        Histogram::from_channel_iterator(&mut g_channel)
+    }
+
+    pub fn red_histogram(&self) -> Histogram {
+        let mut r_channel = self.r_iter();
+        Histogram::from_channel_iterator(&mut r_channel)
+    }
+
+
+    /// I am 99% sure this is useless in most cases
+    pub fn alpha_histogram(&self) -> Histogram {
+        let mut a_channel = self.a_iter();
+        Histogram::from_channel_iterator(&mut a_channel)
     }
 }
 
