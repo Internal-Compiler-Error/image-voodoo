@@ -9,7 +9,9 @@ use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 /// An RGBA image. The data is stored in a flat array in row-major order. Exactly like how ImageData
-/// is stored in the browser.
+/// is stored in the browser. You almost never need to use this struct directly. Instead, use the
+/// `CanvasImage` struct. Which is a wrapper around this struct. This only exists because
+/// wasm-bindgen doesn't do lifetimes
 pub struct ConcreteImage {
     data: Vec<u8>,
     width: u32,

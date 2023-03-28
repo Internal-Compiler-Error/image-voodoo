@@ -3,7 +3,6 @@ use num_traits::int::PrimInt;
 use wasm_bindgen::Clamped;
 use web_sys::ImageData;
 
-
 pub struct CanvasImage<'a> {
     data: Clamped<Vec<u8>>,
     width: u32,
@@ -18,6 +17,33 @@ pub struct RBGAIterator<'a> {
     x: u32,
     /// The current y position, we should read from this before incrementing it.
     y: u32,
+}
+
+/// An iterator over a single channel of an image. Goes from left to right, top to bottom.
+pub struct ChannelIterator<'a> {
+    image: &'a CanvasImage<'a>,
+    /// The current x position, we should read from this before incrementing it.
+    x: u32,
+    /// The current y position, we should read from this before incrementing it.
+    y: u32,
+    /// how much we need to add to the base index to get the correct channel
+    offset: u8,
+}
+
+impl Iterator for ChannelIterator<'_> {
+    type Item = u8;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let offset = 4 * (self.y * self.image.width + self.x) as usize;
+        let value = self.image.data.get(offset + self.offset as usize).cloned();
+
+        self.x += 1;
+        if self.x >= self.image.width {
+            self.x = 0;
+            self.y += 1;
+        }
+        value
+    }
 }
 
 impl Iterator for RBGAIterator<'_> {
@@ -86,11 +112,52 @@ impl CanvasImage<'_> {
         self.height
     }
 
+    /// returns an iterator over the RGBA values of the image
     pub fn rgba_iter(&self) -> RBGAIterator {
         RBGAIterator {
             image: self,
             x: 0,
             y: 0,
+        }
+    }
+
+    /// returns an iterator over the red channel
+    pub fn r_iter(&self) -> ChannelIterator {
+        ChannelIterator {
+            image: self,
+            x: 0,
+            y: 0,
+            offset: 0,
+        }
+    }
+
+    /// returns an iterator over the green channel
+    pub fn g_iter(&self) -> ChannelIterator {
+        ChannelIterator {
+            image: self,
+            x: 0,
+            y: 0,
+            offset: 1,
+        }
+    }
+
+    /// returns an iterator over the blue channel
+    pub fn b_iter(&self) -> ChannelIterator {
+        ChannelIterator {
+            image: self,
+            x: 0,
+            y: 0,
+            offset: 2,
+        }
+    }
+
+    /// honestly don't know why you would ever want an iterator over the alpha channel but ok
+    pub fn a_iter(&self) -> ChannelIterator {
+        ChannelIterator {
+            image: self,
+            x: 0,
+            y: 0,
+            offset: 3,
         }
     }
 }
