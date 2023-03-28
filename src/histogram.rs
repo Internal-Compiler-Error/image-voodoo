@@ -34,10 +34,39 @@ impl Histogram {
             .for_each(|x| *x /= bucket_count as f64);
 
         #[cfg(debug_assertions)]
-        {
-            let sum: f64 = self.buckets.iter().sum();
-            debug_assert!(approx_eq!(f64, sum, 1.0));
-        }
+        debug_assert!(self.is_normalized());
+    }
+
+    /// Build a *new* histogram that is the cumulative histogram of the current histogram
+    pub fn cumulative(&self) -> Histogram {
+        // cumulative and scans are the same thing
+        let cumulative: Vec<_> =
+            self.buckets.iter().scan(0f64, |sum, e| {
+                *sum += e;
+                Some(*sum)
+            }).collect();
+
+        Histogram { buckets: cumulative }
+    }
+
+    /// Build a *new* histogram that is the cumulative histogram of the current histogram and then
+    /// normalize it
+    pub fn culmulative_normalized(&self) -> Histogram {
+        let mut hist = self.cumulative();
+        hist.normalize();
+        hist
+    }
+
+    pub fn is_normalized(&self) -> bool {
+        let sum: f64 = self.buckets.iter().sum();
+        approx_eq!(f64, sum, 1.0)
+    }
+
+    /// Unlike the normalized, we can't really check if the histogram is cumulative, so we just
+    /// check if the last bucket is 1
+    pub fn is_cumulative(&self) -> bool {
+        let last = self.buckets.last().unwrap();
+        approx_eq!(f64, *last, 1.0)
     }
 }
 
