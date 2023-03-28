@@ -195,6 +195,44 @@ impl CanvasImage<'_> {
         let mut a_channel = self.a_iter();
         Histogram::from_channel_iterator(&mut a_channel)
     }
+
+    pub fn equalize(&self) -> ImageData {
+        let mut image = self.data.0.clone();
+
+        let mut r_channel = self.r_iter();
+        let mut g_channel = self.g_iter();
+        let mut b_channel = self.b_iter();
+
+        let r_hist = Histogram::from_channel_iterator(&mut r_channel)
+            .cumulative_normalized();
+        let g_hist = Histogram::from_channel_iterator(&mut g_channel)
+            .cumulative_normalized();
+        let b_hist = Histogram::from_channel_iterator(&mut b_channel)
+            .cumulative_normalized();
+
+        let r_bucket = r_hist.bucket();
+        let g_bucket = g_hist.bucket();
+        let b_bucket = b_hist.bucket();
+
+        image
+            .as_mut_slice()
+            .chunks_exact_mut(4)
+            .for_each(|chunk| {
+                let r_freq = r_bucket[chunk[0] as usize];
+                let g_freq = g_bucket[chunk[1] as usize];
+                let b_freq = b_bucket[chunk[2] as usize];
+
+                chunk[0] = (r_freq * 255.0).clamp(0.0, 255.0) as u8;
+                chunk[1] = (g_freq * 255.0).clamp(0.0, 255.0) as u8;
+                chunk[2] = (b_freq * 255.0).clamp(0.0, 255.0) as u8;
+            });
+
+        ImageData::new_with_u8_clamped_array_and_sh(
+            Clamped(image.as_slice()),
+            self.width,
+            self.height,
+        ).unwrap()
+    }
 }
 
 pub trait ZeroPaddedImage {
@@ -430,7 +468,7 @@ pub fn reflective_indexed<'a, F, U, S>(f: &'a F, x_period: U, y_period: U) -> im
 #[cfg(test)]
 mod test {
     use super::*;
-    use ImageData;
+
 
     #[test]
     fn zero_padded_returns_zero() {

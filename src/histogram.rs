@@ -51,7 +51,7 @@ impl Histogram {
 
     /// Build a *new* histogram that is the cumulative histogram of the current histogram and then
     /// normalize it
-    pub fn culmulative_normalized(&self) -> Histogram {
+    pub fn cumulative_normalized(&self) -> Histogram {
         let mut hist = self.cumulative();
         hist.normalize();
         hist
