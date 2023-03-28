@@ -85,6 +85,14 @@ impl CanvasImage<'_> {
     pub fn height(&self) -> u32 {
         self.height
     }
+
+    pub fn rgba_iter(&self) -> RBGAIterator {
+        RBGAIterator {
+            image: self,
+            x: 0,
+            y: 0,
+        }
+    }
 }
 
 pub trait ZeroPaddedImage {
