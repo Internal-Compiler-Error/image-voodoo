@@ -368,9 +368,10 @@ pub fn circular_indexed<'a, F, C>(f: &'a F, x_period: C, y_period: C) -> impl Fn
 #[cfg(test)]
 mod test {
     use super::*;
+    use ImageData;
 
     #[test]
-    fn test_zero_padded() {
+    fn zero_padded_returns_zero() {
         // only defined from 0 to 6 for both x and y
         let f = |x, y| {
             if 0 <= x && x < 7 && 0 <= y && y < 7 {
