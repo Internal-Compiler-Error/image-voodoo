@@ -1,9 +1,5 @@
 //! Test suite for the Web and headless browsers.
-
 #![cfg(target_arch = "wasm32")]
-
-extern crate wasm_bindgen_test;
-
 use wasm_bindgen_test::*;
 use web_sys::ImageData;
 use wasm_bindgen::Clamped;
@@ -18,7 +14,7 @@ fn pass() {
 
 #[wasm_bindgen_test]
 fn r_access_work_as_expected() {
-    // not this is in RGBA format
+    // note this is in RGBA format
     let image: Vec<u8> = vec![
         0, 1, 2, 0,
         3, 4, 5, 0,
@@ -37,7 +33,7 @@ fn r_access_work_as_expected() {
 
 #[wasm_bindgen_test]
 fn g_access_work_as_expected() {
-    // not this is in RGBA format
+    // note this is in RGBA format
     let image: Vec<u8> = vec![
         0, 1, 2, 0,
         3, 4, 5, 0,
@@ -56,7 +52,7 @@ fn g_access_work_as_expected() {
 
 #[wasm_bindgen_test]
 fn b_access_work_as_expected() {
-    // not this is in RGBA format
+    // note this is in RGBA format
     let image: Vec<u8> = vec![
         0, 1, 2, 0,
         3, 4, 5, 0,
