@@ -27,7 +27,7 @@ pub(crate) fn euclidean_distance(x1: u32, y1: u32, x2: u32, y2: u32) -> f64 {
 
 /// Scales the image to the new width and height, missing pixel values are found using nearest
 /// neighbor interpolation
-pub(crate) fn nearest(image: &CanvasImage, new_width: u32, new_height: u32) -> CanvasImage {
+pub fn scale_nearest(image: &CanvasImage, new_width: u32, new_height: u32) -> CanvasImage {
     let width_scale_factor = new_width / image.width();
     let height_scale_factor = new_height / image.height();
 
