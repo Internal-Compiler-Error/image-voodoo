@@ -9,7 +9,6 @@ pub(crate) fn linear_interpolation(x: u32, x0: u32, x1: u32, f0: u8, f1: u8) -> 
         .clamp(0.0, 255.0) as u8
 }
 
-
 pub(crate) fn bilinear_interpolation(x: u32, y: u32,
                                      x0: u32, y0: u32,
                                      x1: u32, y1: u32,
@@ -34,6 +33,49 @@ pub(crate) fn bilinear_interpolation(x: u32, y: u32,
     linear_interpolation(x, x0, x1, f0, f1)
 }
 
+
+pub(crate) fn nearest_neighbour_interpolation(x: u32,
+                                              x0: u32,
+                                              x1: u32,
+                                              f0: u8,
+                                              f1: u8,
+) -> u8 {
+    assert!(x0 <= x && x <= x1);
+
+    let x0_dist = x - x0;
+    let x1_dist = x1 - x;
+
+    if x0_dist < x1_dist {
+        f0
+    } else {
+        f1
+    }
+}
+
+pub(crate) fn bi_nearest_neighbour_interpolation(x: u32, y: u32,
+                                                 x0: u32, y0: u32,
+                                                 x1: u32, y1: u32,
+                                                 f: &dyn Fn(u32, u32) -> u8,
+) -> u8 {
+    assert!(x0 <= x && x <= x1);
+    assert!(y0 <= y && y <= y1);
+
+    let f00: u8 = f(x0, y0);
+    let f01: u8 = f(x0, y1);
+    let f10: u8 = f(x1, y0);
+    let f11: u8 = f(x1, y1);
+
+
+    // interpolate between f00 and f01
+    let f0 = nearest_neighbour_interpolation(y, y0, y1, f00, f01);
+
+    // interpolate between f10 and f11
+    let f1 = nearest_neighbour_interpolation(y, y0, y1, f10, f11);
+
+
+    // interpolate between f0 and f1
+    nearest_neighbour_interpolation(x, x0, x1, f0, f1)
+}
 
 #[cfg(test)]
 mod tests {
@@ -86,7 +128,7 @@ mod tests {
 
     #[test]
     fn bilinear_interpolation_on_identity() {
-        let f = |x: u32, y: u32| x as u8  + y as u8;
+        let f = |x: u32, y: u32| x as u8 + y as u8;
         let x0 = 0u32;
         let x1 = 99u32;
         let y0 = 0u32;
