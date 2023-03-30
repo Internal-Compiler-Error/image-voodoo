@@ -2,7 +2,7 @@ use wasm_bindgen::Clamped;
 use web_sys::ImageData;
 use crate::fn_extensions::CanvasImage;
 
-pub enum Interpretation {
+pub enum Interpolation {
     Nearest,
     Bilinear,
     Bicubic,
