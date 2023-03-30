@@ -1,3 +1,4 @@
+use std::slice::ChunksExactMut;
 use super::*;
 
 /// An iterator over the RGBA values of an image. Goes from left to right, top to bottom.
@@ -7,6 +8,25 @@ pub struct RBGAIterator<'a> {
     x: u32,
     /// The current y position, we should read from this before incrementing it.
     y: u32,
+}
+
+pub struct RBGAIteratorMut<'a> {
+    chunk_iter: ChunksExactMut<'a, u8>,
+}
+
+impl<'a> Iterator for RBGAIteratorMut<'a> {
+    type Item = (&'a mut u8, &'a mut u8, &'a mut u8, &'a mut u8);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let chunk = self.chunk_iter.next()?;
+
+        let (r, s) = chunk.split_first_mut()?;
+        let (g, s) = s.split_first_mut()?;
+        let (b, s) = s.split_first_mut()?;
+        let (a, _) = s.split_first_mut()?;
+
+        Some((r, g, b, a))
+    }
 }
 
 /// An iterator over a single channel of an image. Goes from left to right, top to bottom.
@@ -63,6 +83,12 @@ impl CanvasImage {
             image: self,
             x: 0,
             y: 0,
+        }
+    }
+
+    pub fn rgba_iter_mut(&mut self) -> RBGAIteratorMut {
+        RBGAIteratorMut {
+            chunk_iter: self.data.chunks_exact_mut(4),
         }
     }
 
