@@ -70,7 +70,49 @@ impl Iterator for RBGAIterator<'_> {
     }
 }
 
+/// Consumes the canvas image and returns an ImageData for the browser
+impl Into<ImageData> for CanvasImage<'_> {
+    fn into(self) -> ImageData {
+        ImageData::new_with_u8_clamped_array_and_sh(Clamped(self.data.0.as_slice()), self.width, self.height).unwrap()
+    }
+}
+
 impl CanvasImage<'_> {
+    /// Returns a new image that is flipped horizontally. In other words, the image is mirrored along
+    /// the vertical axis.
+    pub fn flip_horizontal(&self) -> ImageData {
+        let mut data = Vec::new();
+
+        for y in 0..self.height {
+            for x in (0..self.width).rev() {
+                data.push(self.r(x, y).unwrap());
+                data.push(self.g(x, y).unwrap());
+                data.push(self.b(x, y).unwrap());
+                data.push(self.a(x, y).unwrap());
+            }
+        }
+
+        ImageData::new_with_u8_clamped_array_and_sh(Clamped(&data), self.width, self.height).unwrap()
+    }
+
+    /// Returns a new image that is flipped vertically. In other words, the image is mirrored along
+    /// the horizontal axis.
+    pub fn flip_vertical(&self) -> ImageData {
+        let mut data = Vec::new();
+
+        for y in (0..self.height).rev() {
+            for x in 0..self.width {
+                data.push(self.r(x, y).unwrap());
+                data.push(self.g(x, y).unwrap());
+                data.push(self.b(x, y).unwrap());
+                data.push(self.a(x, y).unwrap());
+            }
+        }
+
+        ImageData::new_with_u8_clamped_array_and_sh(Clamped(&data), self.width, self.height).unwrap()
+    }
+
+
     /**************************** random junk **************************************/
 
     pub fn new(image_data: &ImageData) -> CanvasImage {
