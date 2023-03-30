@@ -4,6 +4,7 @@ pub mod single_pixel_transformation;
 pub mod histogram;
 pub mod convolution;
 pub mod scaling;
+pub mod interpolation;
 
 use wasm_bindgen::prelude::*;
 
