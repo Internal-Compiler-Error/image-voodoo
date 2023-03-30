@@ -1,11 +1,11 @@
 use wasm_bindgen::Clamped;
-use crate::fn_extensions::CanvasImage;
+use crate::canvas_image::CanvasImage;
 
 use wasm_bindgen::prelude::*;
 use web_sys::ImageData;
 
 #[wasm_bindgen]
-pub fn linear_transformation(image: &ImageData, gain: f64, bias: f64) -> ImageData {
+pub fn linear_transformation(image: ImageData, gain: f64, bias: f64) -> ImageData {
     let mut buffer = Vec::with_capacity((image.height() * image.width() * 4) as usize);
 
     let image = CanvasImage::new(image);
@@ -33,7 +33,7 @@ pub fn linear_transformation(image: &ImageData, gain: f64, bias: f64) -> ImageDa
 }
 
 #[wasm_bindgen]
-pub fn gamma_transformation(image: &ImageData, gamma: f64) -> ImageData {
+pub fn gamma_transformation(image: ImageData, gamma: f64) -> ImageData {
     let mut buffer = Vec::with_capacity((image.height() * image.width() * 4) as usize);
     let image = CanvasImage::new(image);
 

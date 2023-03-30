@@ -1,5 +1,5 @@
 pub mod utils;
-pub mod fn_extensions;
+pub mod canvas_image;
 pub mod single_pixel_transformation;
 pub mod histogram;
 pub mod convolution;

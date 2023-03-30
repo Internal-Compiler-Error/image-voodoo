@@ -1,5 +1,5 @@
 use float_cmp::approx_eq;
-use crate::fn_extensions::{ChannelIterator};
+use crate::canvas_image::{ChannelIterator};
 
 pub struct Histogram {
     // it's f64 because we need to normalize it

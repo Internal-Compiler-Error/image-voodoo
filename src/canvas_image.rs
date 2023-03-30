@@ -1,6 +1,5 @@
 use std::convert::TryFrom;
 use std::fmt::Debug;
-use std::marker::PhantomData;
 use num::{Integer, Signed};
 use num::integer::div_floor;
 use num::abs;
@@ -8,16 +7,15 @@ use wasm_bindgen::Clamped;
 use web_sys::ImageData;
 use crate::histogram::Histogram;
 
-pub struct CanvasImage<'a> {
-    data: Clamped<Vec<u8>>,
+pub struct CanvasImage {
+    data: Vec<u8>,
     width: u32,
     height: u32,
-    _marker: PhantomData<&'a ImageData>,
 }
 
 /// An iterator over the RGBA values of an image. Goes from left to right, top to bottom.
 pub struct RBGAIterator<'a> {
-    image: &'a CanvasImage<'a>,
+    image: &'a CanvasImage,
     /// The current x position, we should read from this before incrementing it.
     x: u32,
     /// The current y position, we should read from this before incrementing it.
@@ -26,7 +24,7 @@ pub struct RBGAIterator<'a> {
 
 /// An iterator over a single channel of an image. Goes from left to right, top to bottom.
 pub struct ChannelIterator<'a> {
-    image: &'a CanvasImage<'a>,
+    image: &'a CanvasImage,
     /// The current x position, we should read from this before incrementing it.
     x: u32,
     /// The current y position, we should read from this before incrementing it.
@@ -71,13 +69,13 @@ impl Iterator for RBGAIterator<'_> {
 }
 
 /// Consumes the canvas image and returns an ImageData for the browser
-impl Into<ImageData> for CanvasImage<'_> {
-    fn into(self) -> ImageData {
-        ImageData::new_with_u8_clamped_array_and_sh(Clamped(self.data.0.as_slice()), self.width, self.height).unwrap()
+impl Into<ImageData> for CanvasImage {
+    fn into(mut self) -> ImageData {
+        ImageData::new_with_u8_clamped_array_and_sh(Clamped(&mut self.data), self.width, self.height).unwrap()
     }
 }
 
-impl CanvasImage<'_> {
+impl CanvasImage {
     /// Returns a new image that is flipped horizontally. In other words, the image is mirrored along
     /// the vertical axis.
     pub fn flip_horizontal(&self) -> ImageData {
@@ -115,12 +113,11 @@ impl CanvasImage<'_> {
 
     /**************************** random junk **************************************/
 
-    pub fn new(image_data: &ImageData) -> CanvasImage {
+    pub fn new(image_data: ImageData) -> CanvasImage {
         CanvasImage {
-            data: image_data.data(),
+            data: image_data.data().0,
             width: image_data.width(),
             height: image_data.height(),
-            _marker: PhantomData,
         }
     }
 
@@ -239,7 +236,7 @@ impl CanvasImage<'_> {
     }
 
     pub fn equalize(&self) -> ImageData {
-        let mut image = self.data.0.clone();
+        let mut image = self.data.clone();
 
         let mut r_channel = self.r_iter();
         let mut g_channel = self.g_iter();
@@ -291,7 +288,7 @@ trait CircularIndexedImage {
     fn a(&self, x: i32, y: i32) -> u8;
 }
 
-impl CircularIndexedImage for CanvasImage<'_> {
+impl CircularIndexedImage for CanvasImage {
     fn r(&self, x: i32, y: i32) -> u8 {
         if x < 0 || y < 0 {
             return 0;
@@ -341,7 +338,7 @@ impl CircularIndexedImage for CanvasImage<'_> {
     }
 }
 
-impl ZeroPaddedImage for CanvasImage<'_> {
+impl ZeroPaddedImage for CanvasImage {
     fn r(&self, x: i32, y: i32) -> u8 {
         if x < 0 || y < 0 {
             return 0;

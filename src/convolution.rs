@@ -2,7 +2,7 @@ use std::ops;
 use wasm_bindgen::Clamped;
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::ImageData;
-use crate::fn_extensions::{CanvasImage, ZeroPaddedImage};
+use crate::canvas_image::{CanvasImage, ZeroPaddedImage};
 use crate::utils;
 
 #[wasm_bindgen]
@@ -20,7 +20,7 @@ pub enum BorderStrategy {
 }
 
 #[wasm_bindgen]
-pub fn convolve(image: &ImageData, kernel: &Kernel, border_strategy: BorderStrategy) -> ImageData {
+pub fn convolve(image: ImageData, kernel: &Kernel, border_strategy: BorderStrategy) -> ImageData {
     utils::set_panic_hook();
 
     let image = CanvasImage::new(image);
