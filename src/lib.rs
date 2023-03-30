@@ -3,6 +3,7 @@ pub mod fn_extensions;
 pub mod single_pixel_transformation;
 pub mod histogram;
 pub mod convolution;
+pub mod scaling;
 
 use wasm_bindgen::prelude::*;
 
