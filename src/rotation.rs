@@ -1,5 +1,7 @@
 use crate::canvas_image::CanvasImage;
 use itertools::iproduct;
+use wasm_bindgen::prelude::wasm_bindgen;
+use web_sys::ImageData;
 
 /// Rotate the image by radian, enlarge the image to fit the rotated image, empty spaces are filled
 /// using bilinear interpolation.
@@ -41,4 +43,12 @@ pub fn rotate_rad(image: &CanvasImage, radian: f64) -> CanvasImage {
 /// using bilinear interpolation.
 pub fn rotate_deg(image: &CanvasImage, degree: f64) -> CanvasImage {
     rotate_rad(image, degree / 180f64 * std::f64::consts::PI)
+}
+
+#[wasm_bindgen]
+pub fn rotate(image: ImageData, degree: f64) -> ImageData {
+    let canvas_image = CanvasImage::new(image);
+
+    let rotated = rotate_deg(&canvas_image, degree);
+    rotated.into()
 }

@@ -1,13 +1,13 @@
-pub mod utils;
+use wasm_bindgen::prelude::*;
+
 pub mod canvas_image;
-pub mod single_pixel_transformation;
-pub mod histogram;
 pub mod convolution;
-pub mod scaling;
+pub mod histogram;
 pub mod interpolation;
 pub mod rotation;
-
-use wasm_bindgen::prelude::*;
+pub mod scaling;
+pub mod single_pixel_transformation;
+pub mod utils;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -16,7 +16,6 @@ use wasm_bindgen::prelude::*;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
-extern {
+extern "C" {
     fn alert(s: &str);
 }
-
