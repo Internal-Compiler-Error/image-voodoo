@@ -1,3 +1,43 @@
+/// Interpolation functions
+pub trait BiInterpolation {
+    /// Interpolates the value of f(x, y) given the values of f(x0, y0), f(x1, y0), f(x0, y1), and
+    /// f(x1, y1).
+    fn interpolate(
+        &self,
+        x: f64,
+        y: f64,
+        x0: u32,
+        y0: u32,
+        x1: u32,
+        y1: u32,
+        f: &dyn Fn(u32, u32) -> u8,
+    ) -> u8;
+}
+
+pub struct BiLinearInterpolation;
+
+impl BiInterpolation for BiLinearInterpolation {
+    fn interpolate(
+        &self,
+        x: f64,
+        y: f64,
+        x0: u32,
+        y0: u32,
+        x1: u32,
+        y1: u32,
+        f: &dyn Fn(u32, u32) -> u8,
+    ) -> u8 {
+        bilinear_interpolation(x, y, x0, y0, x1, y1, f)
+    }
+}
+
+pub struct BiNearestNeighbourInterpolation;
+impl BiInterpolation for BiNearestNeighbourInterpolation {
+    fn interpolate(&self, x: f64, y: f64, x0: u32, y0: u32, x1: u32, y1: u32, f: &dyn Fn(u32, u32) -> u8) -> u8 {
+       bi_nearest_neighbour_interpolation(x, y, x0, y0, x1, y1, f)
+    }
+}
+
 pub(crate) fn linear_interpolation(x: f64, x0: u32, x1: u32, f0: f64, f1: f64) -> f64 {
     assert!(x0 as f64 <= x && x <= x1 as f64);
 
