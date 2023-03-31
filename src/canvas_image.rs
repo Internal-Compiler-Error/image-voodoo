@@ -69,6 +69,18 @@ impl CanvasImage {
         }
     }
 
+    pub fn from_vec_with_size(data: Vec<u8>, width: u32, height: u32) -> CanvasImage {
+        CanvasImage {
+            data,
+            width,
+            height,
+        }
+    }
+
+    pub fn rgba_slice(&self) -> &[u8] {
+        &self.data
+    }
+
     pub fn width(&self) -> u32 {
         self.width
     }
