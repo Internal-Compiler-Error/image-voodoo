@@ -5,6 +5,7 @@ pub mod histogram;
 pub mod convolution;
 pub mod scaling;
 pub mod interpolation;
+pub mod rotation;
 
 use wasm_bindgen::prelude::*;
 
