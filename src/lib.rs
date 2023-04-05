@@ -4,7 +4,7 @@ pub mod canvas_image;
 pub mod convolution;
 pub mod histogram;
 pub mod interpolation;
-pub mod rotation;
+pub mod affine;
 pub mod scaling;
 pub mod single_pixel_transformation;
 pub mod utils;

@@ -3,7 +3,7 @@ use crate::canvas_image::CanvasImage;
 use itertools::{iproduct, Itertools, MinMaxResult};
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::ImageData;
-use nalgebra::{Matrix3, Vector3};
+use nalgebra::{Matrix2, Matrix3, Vector2, Vector3};
 
 /// Find the minimum and maximum value of an iterator. If the iterator is empty, it will panic.
 fn min_max<T>(result: &MinMaxResult<T>) -> (T, T)
@@ -101,40 +101,38 @@ pub fn rotate_deg(image: &CanvasImage, degree: f64) -> CanvasImage {
     rotate_rad(image, degree / 180f64 * std::f64::consts::PI)
 }
 
+fn new_size_after_transformation(width: f64, height: f64, transformation: &Matrix2<f64>) -> (u32, u32) {
+    let corners = [(0.0, 0.0), (0.0, height), (width, 0.0), (width, height)];
+    let transformed_corners = corners
+        .iter()
+        .map(|&(x, y)| Vector2::new(x, y))
+        .map(|v| transformation * v)
+        .map(|v| (v.x, v.y));
+
+    let x_minmax = transformed_corners
+        .clone()
+        .map(|(x, _)| x).minmax();
+    let y_minmax = transformed_corners
+        .clone()
+        .map(|(_, y)| y).minmax();
+
+    let (x_min, x_max) = min_max(&x_minmax);
+    let (y_min, y_max) = min_max(&y_minmax);
+
+    let new_width = (x_max - x_min).ceil() as u32 + 1;
+    let new_height = (y_max - y_min).ceil() as u32 + 1;
+
+    (new_width, new_height)
+}
+
+
 fn width_height_after_rotation_matrix(radian: f64, width: f64, height: f64) -> (u32, u32) {
-    let rotation_matrix = Matrix3::new(
-        radian.cos(), -radian.sin(), 0.0,
-        radian.sin(), radian.cos(), 0.0,
-        0.0, 0.0, 1.0,
+    let rotation_matrix = Matrix2::new(
+        radian.cos(), -radian.sin(),
+        radian.sin(), radian.cos(),
     );
 
-
-    let (new_width, new_height) = {
-        // calculate the rotated image bounds
-        let corners = [(0.0, 0.0), (0.0, height), (width, 0.0), (width, height)];
-        let rotated_corners = corners
-            .iter()
-            .map(|&(x, y)| Vector3::new(x, y, 1.0))
-            .map(|v| rotation_matrix * v)
-            .map(|v| (v.x, v.y));
-
-        let x_minmax = rotated_corners
-            .clone()
-            .map(|(x, _)| x).minmax();
-        let y_minmax = rotated_corners
-            .clone()
-            .map(|(_, y)| y).minmax();
-
-        let (x_min, x_max) = min_max(&x_minmax);
-        let (y_min, y_max) = min_max(&y_minmax);
-
-        // calculate the size of the new image
-        let new_width = (x_max - x_min).ceil() as u32 + 1;
-        let new_height = (y_max - y_min).ceil() as u32 + 1;
-
-        (new_width, new_height)
-    };
-    (new_width, new_height)
+    new_size_after_transformation(width, height, &rotation_matrix)
 }
 
 #[wasm_bindgen]
