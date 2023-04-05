@@ -143,43 +143,60 @@ pub fn rotate(image: ImageData, degree: f64) -> ImageData {
     rotated.into()
 }
 
+fn get_operation_matrix(width: usize, height: usize, transformation: &Matrix2<f64>) -> Matrix3<f64> {
+    let width = width as f64;
+    let height = height as f64;
+
+    let (new_width, new_height) = new_size_after_transformation(width, height, transformation);
+
+    // offset from the center before rotation
+    let (cx, cy) = (
+        width as f64 / 2f64,
+        height as f64 / 2f64);
+
+    // offset from the center after rotation
+    let (ox, oy) = (
+        (new_width as f64 - width) as f64 / 2.0,
+        (new_height as f64 - height) as f64 / 2.0,
+    );
+
+    let to_after = Matrix3::new(
+        1.0, 0.0, cx,
+        0.0, 1.0, cy,
+        0.0, 0.0, 1.0,
+    );
+
+
+    let to_before = Matrix3::new(
+        1.0, 0.0, -cx - ox,
+        0.0, 1.0, -cy - oy,
+        0.0, 0.0, 1.0,
+    );
+
+    // convert the transformation matrix to 3x3 matrix
+    let transformation = Matrix3::new(
+        transformation[(0, 0)], transformation[(0, 1)], 0.0,
+        transformation[(1, 0)], transformation[(1, 1)], 0.0,
+        0.0, 0.0, 1.0,
+    );
+
+    to_after * transformation * to_before
+}
+
+
 fn rotate_via_matrix(image: &CanvasImage, radian: f64) -> CanvasImage {
     let width = image.width() as f64;
     let height = image.height() as f64;
 
     let (new_width, new_height) = width_height_after_rotation_matrix(radian, width, height);
 
-    // offset from the center before rotation
-    let (cx, cy) = (
-        image.width() as f64 / 2f64,
-        image.height() as f64 / 2f64);
-
-    // offset from the center after rotation
-    let (ox, oy) = (
-        (new_width - image.width()) as f64 / 2.0,
-        (new_height - image.height()) as f64 / 2.0,
+    let rotate = Matrix2::new(
+        radian.cos(), -radian.sin(),
+        radian.sin(), radian.cos(),
     );
-
-
-    let rotate = Matrix3::new(
-        radian.cos(), -radian.sin(), 0.0,
-        radian.sin(), radian.cos(), 0.0,
-        0.0, 0.0, 1.0,
-    );
-
-    let translate_to_image = Matrix3::new(
-        1.0, 0.0, cx,
-        0.0, 1.0, cy,
-        0.0, 0.0, 1.0,
-    );
-
-    let translate_to_origin = Matrix3::new(
-        1.0, 0.0, -ox - cx,
-        0.0, 1.0, -oy - cy,
-        0.0, 0.0, 1.0,
-    );
-
-    let transform = translate_to_image * rotate * translate_to_origin;
+    let transform = get_operation_matrix(image.width() as usize,
+                                         image.height() as usize,
+                                         &rotate);
 
 
     let rgba = iproduct!(0..new_height, 0..new_width)
