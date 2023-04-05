@@ -1,7 +1,31 @@
 use crate::canvas_image::CanvasImage;
-use itertools::iproduct;
+use itertools::{iproduct, Itertools, MinMaxResult};
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::ImageData;
+
+/// Find the minimum and maximum value of an iterator. If the iterator is empty, it will panic.
+fn min_max<T>(result: &MinMaxResult<T>) -> (T, T)
+    where
+        T: Copy
+{
+    match result {
+        MinMaxResult::OneElement(min_max) => {
+            (*min_max, *min_max)
+        }
+        MinMaxResult::MinMax(min, max) => {
+            (*min, *max)
+        }
+        _ => unreachable!()
+    }
+}
+
+/// Rotate a point by radian
+fn rotate_point(point: (f64, f64), radian: f64) -> (f64, f64) {
+    let (x, y) = point;
+    let new_x = x * radian.cos() + y * radian.sin();
+    let new_y = -x * radian.sin() + y * radian.cos();
+    (new_x, new_y)
+}
 
 /// Rotate the image by radian, enlarge the image to fit the rotated image, empty spaces are filled
 /// using bilinear interpolation.
@@ -12,31 +36,21 @@ pub fn rotate_rad(image: &CanvasImage, radian: f64) -> CanvasImage {
     let (new_width, new_height) = {
         // calculate the rotated image bounds
         let corners = [(0.0, 0.0), (0.0, height), (width, 0.0), (width, height)];
-        let rotated_corners = corners.iter().map(|&(x, y)| {
-            let new_x = x * radian.cos() - y * radian.sin();
-            let new_y = x * radian.sin() + y * radian.cos();
-            (new_x, new_y)
-        });
-        let min_x = rotated_corners
+        let rotated_corners = corners.iter().map(|&(x, y)| rotate_point((x, y), radian));
+
+        let x_minmax = rotated_corners
             .clone()
-            .map(|(x, _)| x)
-            .fold(f64::INFINITY, f64::min);
-        let max_x = rotated_corners
+            .map(|(x, _)| x).minmax();
+        let y_minmax = rotated_corners
             .clone()
-            .map(|(x, _)| x)
-            .fold(f64::NEG_INFINITY, f64::max);
-        let min_y = rotated_corners
-            .clone()
-            .map(|(_, y)| y)
-            .fold(f64::INFINITY, f64::min);
-        let max_y = rotated_corners
-            .clone()
-            .map(|(_, y)| y)
-            .fold(f64::NEG_INFINITY, f64::max);
+            .map(|(_, y)| y).minmax();
+
+        let (x_min, x_max) = min_max(&x_minmax);
+        let (y_min, y_max) = min_max(&y_minmax);
 
         // calculate the size of the new image
-        let new_width = (max_x - min_x).ceil() as u32 + 1;
-        let new_height = (max_y - min_y).ceil() as u32 + 1;
+        let new_width = (x_max - x_min).ceil() as u32 + 1;
+        let new_height = (y_max - y_min).ceil() as u32 + 1;
 
         (new_width, new_height)
     };
@@ -51,15 +65,17 @@ pub fn rotate_rad(image: &CanvasImage, radian: f64) -> CanvasImage {
     );
 
     let rgba = iproduct!(0..new_height, 0..new_width).flat_map(|(y, x)| {
+        // pixel coordinates before rotation
         let x = x as f64 - cx - ox;
-        let y = cy - y as f64 + oy;
+        let y = y as f64 - cy - oy;
 
         // rotate the pixel coordinates
-        let new_x = x * radian.cos() - y * radian.sin();
-        let new_y = x * radian.sin() + y * radian.cos();
+        let (new_x, new_y) = rotate_point((x, y), radian);
 
+        // pixel coordinates after rotation
         let x = (new_x + cx).round() as i32;
-        let y = (cy - new_y).round() as i32;
+        let y = (new_y + cy).round() as i32;
+
 
         let pixel = if x >= 0 && x < image.width() as i32 && y >= 0 && y < image.height() as i32 {
             image.rgba(x as u32, y as u32).unwrap_or((255, 0, 0, 0))
@@ -113,7 +129,7 @@ mod tests {
             rotated.height(),
             rotated.rgba_slice().clone(),
         )
-        .unwrap();
+            .unwrap();
         image.save("meme_rotated.png").unwrap();
     }
 }
