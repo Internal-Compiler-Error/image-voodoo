@@ -1,7 +1,9 @@
+use std::arch::asm;
 use crate::canvas_image::CanvasImage;
 use itertools::{iproduct, Itertools, MinMaxResult};
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::ImageData;
+use nalgebra::{Matrix3, Vector3};
 
 /// Find the minimum and maximum value of an iterator. If the iterator is empty, it will panic.
 fn min_max<T>(result: &MinMaxResult<T>) -> (T, T)
@@ -99,6 +101,42 @@ pub fn rotate_deg(image: &CanvasImage, degree: f64) -> CanvasImage {
     rotate_rad(image, degree / 180f64 * std::f64::consts::PI)
 }
 
+fn width_height_after_rotation_matrix(radian: f64, width: f64, height: f64) -> (u32, u32) {
+    let rotation_matrix = Matrix3::new(
+        radian.cos(), -radian.sin(), 0.0,
+        radian.sin(), radian.cos(), 0.0,
+        0.0, 0.0, 1.0,
+    );
+
+
+    let (new_width, new_height) = {
+        // calculate the rotated image bounds
+        let corners = [(0.0, 0.0), (0.0, height), (width, 0.0), (width, height)];
+        let rotated_corners = corners
+            .iter()
+            .map(|&(x, y)| Vector3::new(x, y, 1.0))
+            .map(|v| rotation_matrix * v)
+            .map(|v| (v.x, v.y));
+
+        let x_minmax = rotated_corners
+            .clone()
+            .map(|(x, _)| x).minmax();
+        let y_minmax = rotated_corners
+            .clone()
+            .map(|(_, y)| y).minmax();
+
+        let (x_min, x_max) = min_max(&x_minmax);
+        let (y_min, y_max) = min_max(&y_minmax);
+
+        // calculate the size of the new image
+        let new_width = (x_max - x_min).ceil() as u32 + 1;
+        let new_height = (y_max - y_min).ceil() as u32 + 1;
+
+        (new_width, new_height)
+    };
+    (new_width, new_height)
+}
+
 #[wasm_bindgen]
 pub fn rotate(image: ImageData, degree: f64) -> ImageData {
     let canvas_image = CanvasImage::new(image);
@@ -106,6 +144,68 @@ pub fn rotate(image: ImageData, degree: f64) -> ImageData {
     let rotated = rotate_deg(&canvas_image, degree);
     rotated.into()
 }
+
+fn rotate_via_matrix(image: &CanvasImage, radian: f64) -> CanvasImage {
+    let width = image.width() as f64;
+    let height = image.height() as f64;
+
+    let (new_width, new_height) = width_height_after_rotation_matrix(radian, width, height);
+
+    // offset from the center before rotation
+    let (cx, cy) = (
+        image.width() as f64 / 2f64,
+        image.height() as f64 / 2f64);
+
+    // offset from the center after rotation
+    let (ox, oy) = (
+        (new_width - image.width()) as f64 / 2.0,
+        (new_height - image.height()) as f64 / 2.0,
+    );
+
+
+    let rotate = Matrix3::new(
+        radian.cos(), -radian.sin(), 0.0,
+        radian.sin(), radian.cos(), 0.0,
+        0.0, 0.0, 1.0,
+    );
+
+    let translate_to_image = Matrix3::new(
+        1.0, 0.0, cx,
+        0.0, 1.0, cy,
+        0.0, 0.0, 1.0,
+    );
+
+    let translate_to_origin = Matrix3::new(
+        1.0, 0.0, -ox - cx,
+        0.0, 1.0, -oy - cy,
+        0.0, 0.0, 1.0,
+    );
+
+    let transform = translate_to_image * rotate * translate_to_origin;
+
+
+    let rgba = iproduct!(0..new_height, 0..new_width)
+        // map to vector
+        .map(|(y, x)| Vector3::new(x as f64, y as f64, 1.0))
+        // do everything in one step
+        .map(|v| transform * v)
+        // map to intensity
+        .flat_map(|v| {
+            let x = v.x.round() as i32;
+            let y = v.y.round() as i32;
+
+            if x >= 0 && x < image.width() as i32 && y >= 0 && y < image.height() as i32 {
+                image.rgba(x as u32, y as u32)
+                    .map_or([255, 0, 0, 255], |(r, g, b, a)| [r, g, b, a])
+            } else {
+                [255, 0, 0, 255]
+            }
+        });
+
+    let buffer = Vec::from_iter(rgba);
+    CanvasImage::from_vec_with_size(buffer, new_width, new_height)
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -135,5 +235,32 @@ mod tests {
         )
             .unwrap();
         image.save("meme_rotated.png").unwrap();
+    }
+
+    #[test]
+    fn sanity_matrix() {
+        // read the picture from file
+        let image = image::open("meme.png").unwrap();
+
+        // convert to RGBA
+        let image = image.into_rgba8();
+
+        // convert to CanvasImage
+        let width = image.width();
+        let height = image.height();
+        let canvas_image = CanvasImage::from_vec_with_size(image.into_raw(), width, height);
+
+        let degrees = 45.0;
+        let radian = degrees * std::f64::consts::PI / 180.0;
+        let rotated = rotate_via_matrix(&canvas_image, radian);
+
+        // convert to back to image and save
+        let image: ImageBuffer<Rgba<u8>, &[u8]> = ImageBuffer::from_raw(
+            rotated.width(),
+            rotated.height(),
+            rotated.rgba_slice().clone(),
+        )
+            .unwrap();
+        image.save("meme_rotated_matrix.png").unwrap();
     }
 }
