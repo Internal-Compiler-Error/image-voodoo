@@ -5,6 +5,8 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::ImageData;
 use nalgebra::{Matrix2, Matrix3, Vector2, Vector3};
 
+const TRANSPARENT: [u8; 4] = [0, 0, 0, 0];
+
 /// Find the minimum and maximum value of an iterator. If the iterator is empty, it will panic.
 fn min_max<T>(result: &MinMaxResult<T>) -> (T, T)
     where
@@ -211,9 +213,9 @@ fn rotate_via_matrix(image: &CanvasImage, radian: f64) -> CanvasImage {
 
             if x >= 0 && x < image.width() as i32 && y >= 0 && y < image.height() as i32 {
                 image.rgba(x as u32, y as u32)
-                    .map_or([255, 0, 0, 255], |(r, g, b, a)| [r, g, b, a])
+                    .map_or(TRANSPARENT, |(r, g, b, a)| [r, g, b, a])
             } else {
-                [255, 0, 0, 255]
+                TRANSPARENT
             }
         });
 
