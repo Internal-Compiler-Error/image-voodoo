@@ -8,6 +8,7 @@ pub mod affine;
 pub mod scaling;
 pub mod single_pixel_transformation;
 pub mod utils;
+mod image_index;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.

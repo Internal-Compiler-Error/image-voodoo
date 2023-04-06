@@ -2,7 +2,8 @@ use std::ops;
 use wasm_bindgen::Clamped;
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::ImageData;
-use crate::canvas_image::{CanvasImage, ZeroPaddedImage};
+use crate::canvas_image::CanvasImage;
+use crate::image_index::ZeroPaddedImage;
 use crate::utils;
 
 #[wasm_bindgen]
