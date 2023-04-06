@@ -1,4 +1,5 @@
-use std::arch::asm;
+#![allow(dead_code)]
+
 use crate::canvas_image::CanvasImage;
 use itertools::{iproduct, Itertools, MinMaxResult};
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -103,47 +104,7 @@ pub fn rotate_deg(image: &CanvasImage, degree: f64) -> CanvasImage {
     rotate_rad(image, degree / 180f64 * std::f64::consts::PI)
 }
 
-fn new_size_after_transformation(width: f64, height: f64, transformation: &Matrix2<f64>) -> (u32, u32) {
-    let corners = [(0.0, 0.0), (0.0, height), (width, 0.0), (width, height)];
-    let transformed_corners = corners
-        .iter()
-        .map(|&(x, y)| Vector2::new(x, y))
-        .map(|v| transformation * v)
-        .map(|v| (v.x, v.y));
-
-    let x_minmax = transformed_corners
-        .clone()
-        .map(|(x, _)| x).minmax();
-    let y_minmax = transformed_corners
-        .clone()
-        .map(|(_, y)| y).minmax();
-
-    let (x_min, x_max) = min_max(&x_minmax);
-    let (y_min, y_max) = min_max(&y_minmax);
-
-    let new_width = (x_max - x_min).ceil() as u32 + 1;
-    let new_height = (y_max - y_min).ceil() as u32 + 1;
-
-    (new_width, new_height)
-}
-
-
-fn width_height_after_rotation_matrix(radian: f64, width: f64, height: f64) -> (u32, u32) {
-    let rotation_matrix = Matrix2::new(
-        radian.cos(), -radian.sin(),
-        radian.sin(), radian.cos(),
-    );
-
-    new_size_after_transformation(width, height, &rotation_matrix)
-}
-
-#[wasm_bindgen]
-pub fn rotate(image: ImageData, degree: f64) -> ImageData {
-    let canvas_image = CanvasImage::new(image);
-
-    let rotated = rotate_deg(&canvas_image, degree);
-    rotated.into()
-}
+/*********** Matrix Zone ***********/
 
 fn get_operation_matrix(width: usize, height: usize, transformation: &Matrix2<f64>) -> Matrix3<f64> {
     let width = width as f64;
@@ -223,6 +184,90 @@ fn rotate_via_matrix(image: &CanvasImage, radian: f64) -> CanvasImage {
     CanvasImage::from_vec_with_size(buffer, new_width, new_height)
 }
 
+/// Shears the image according to
+/// [1 + lambda * miu, lambda,
+///  miu             , 1]
+fn shear(image: &CanvasImage, lambda: f64, miu: f64) -> CanvasImage {
+    let width = image.width() as f64;
+    let height = image.height() as f64;
+
+    let shear = Matrix2::new(
+        1.0 + lambda * miu, lambda,
+        miu, 1.0,
+    );
+
+    let (new_width, new_height) = new_size_after_transformation(width, height, &shear);
+
+    let transform = get_operation_matrix(image.width() as usize,
+                                         image.height() as usize,
+                                         &shear);
+
+    let rgba = iproduct!(0..new_height, 0..new_width)
+        // map to vector
+        .map(|(y, x)| Vector3::new(x as f64, y as f64, 1.0))
+        // do everything in one step
+        .map(|v| transform * v)
+        // map to intensity
+        .flat_map(|v| {
+            let x = v.x.round() as i32;
+            let y = v.y.round() as i32;
+
+            if x >= 0 && x < image.width() as i32 && y >= 0 && y < image.height() as i32 {
+                image.rgba(x as u32, y as u32)
+                    .map_or(TRANSPARENT, |(r, g, b, a)| [r, g, b, a])
+            } else {
+                TRANSPARENT
+            }
+        });
+
+    let buffer = Vec::from_iter(rgba);
+    CanvasImage::from_vec_with_size(buffer, new_width, new_height)
+}
+
+fn new_size_after_transformation(width: f64, height: f64, transformation: &Matrix2<f64>) -> (u32, u32) {
+    let corners = [
+        Vector2::new(0.0, 0.0),
+        Vector2::new(0.0, height),
+        Vector2::new(width, 0.0),
+        Vector2::new(width, height)];
+    let transformed_corners = corners
+        .iter()
+        .map(|v| transformation * v)
+        .map(|v| (v.x, v.y));
+
+    let x_minmax = transformed_corners
+        .clone()
+        .map(|(x, _)| x).minmax();
+    let y_minmax = transformed_corners
+        .clone()
+        .map(|(_, y)| y).minmax();
+
+    let (x_min, x_max) = min_max(&x_minmax);
+    let (y_min, y_max) = min_max(&y_minmax);
+
+    let new_width = (x_max - x_min).ceil() as u32 + 1;
+    let new_height = (y_max - y_min).ceil() as u32 + 1;
+
+    (new_width, new_height)
+}
+
+fn width_height_after_rotation_matrix(radian: f64, width: f64, height: f64) -> (u32, u32) {
+    let rotation_matrix = Matrix2::new(
+        radian.cos(), -radian.sin(),
+        radian.sin(), radian.cos(),
+    );
+
+    new_size_after_transformation(width, height, &rotation_matrix)
+}
+
+#[wasm_bindgen]
+pub fn rotate(image: ImageData, degree: f64) -> ImageData {
+    let canvas_image = CanvasImage::new(image);
+
+    let rotated = rotate_deg(&canvas_image, degree);
+    rotated.into()
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -279,5 +324,31 @@ mod tests {
         )
             .unwrap();
         image.save("meme_rotated_matrix.png").unwrap();
+    }
+
+    #[test]
+    fn sanity_shear() {
+        // read the picture from file
+        let image = image::open("meme.png").unwrap();
+
+        // convert to RGBA
+        let image = image.into_rgba8();
+
+        // convert to CanvasImage
+        let width = image.width();
+        let height = image.height();
+        let canvas_image = CanvasImage::from_vec_with_size(image.into_raw(), width, height);
+
+
+        let sheared = shear(&canvas_image, 1.0, 1.0);
+
+        // convert to back to image and save
+        let image: ImageBuffer<Rgba<u8>, &[u8]> = ImageBuffer::from_raw(
+            sheared.width(),
+            sheared.height(),
+            sheared.rgba_slice().clone(),
+        )
+            .unwrap();
+        image.save("meme_sheared.png").unwrap();
     }
 }
