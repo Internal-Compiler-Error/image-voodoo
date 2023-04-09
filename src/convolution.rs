@@ -34,12 +34,11 @@ pub fn convolve(image: ImageData, kernel: &Kernel, border_strategy: BorderStrate
     match border_strategy {
         BorderStrategy::Zero => {
             for y in 0..image.height() as isize {
-                for x in 0..image.width()  as isize{
+                for x in 0..image.width() as isize {
                     let mut r_acc = 0f64;
                     let mut g_acc = 0f64;
                     let mut b_acc = 0f64;
                     let mut a_acc = 0f64;
-
 
 
                     // let r = image.r(x as u32, y as u32).unwrap_or(0);
@@ -103,6 +102,41 @@ pub fn convolve(image: ImageData, kernel: &Kernel, border_strategy: BorderStrate
 //
 //     todo!()
 // }
+
+impl CanvasImage {
+    pub fn convolve(&self, kernel: &Kernel) -> Vec<f64> {
+        let mut buffer = vec![0f64; (self.height() * self.width() * 4) as usize];
+        for y in 0..self.height() as isize {
+            for x in 0..self.width() as isize {
+                let mut r_acc = 0f64;
+                let mut g_acc = 0f64;
+                let mut b_acc = 0f64;
+                let mut a_acc = 0f64;
+
+
+                for i in -((kernel.height as isize) / 2)..=(kernel.height / 2) as isize {
+                    for j in -((kernel.width as isize) / 2)..=(kernel.width / 2) as isize {
+                        let r = ZeroPaddedImage::r(self, (x - i) as i32, (y - j) as i32);
+                        let g = ZeroPaddedImage::g(self, (x - i) as i32, (y - j) as i32);
+                        let b = ZeroPaddedImage::b(self, (x - i) as i32, (y - j) as i32);
+                        let a = ZeroPaddedImage::a(self, (x - i) as i32, (y - j) as i32);
+
+                        r_acc += kernel[(i, j)] * r as f64;
+                        g_acc += kernel[(i, j)] * g as f64;
+                        b_acc += kernel[(i, j)] * b as f64;
+                        a_acc += kernel[(i, j)] * a as f64;
+                    }
+                }
+
+                buffer.push(r_acc);
+                buffer.push(g_acc);
+                buffer.push(b_acc);
+                buffer.push(a_acc);
+            }
+        }
+        buffer
+    }
+}
 
 #[wasm_bindgen]
 impl Kernel {

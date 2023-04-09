@@ -1,8 +1,13 @@
 use crate::canvas_image::CanvasImage;
 use enum_iterator::Sequence;
 use itertools::iproduct;
-use num_traits::{abs, abs_sub};
+use num_traits::{abs_sub};
 use crate::image_index::reflective_indexed;
+
+
+const WHITE: [u8; 4] = [255, 255, 255, 0];
+const BLACK: [u8; 4] = [0, 0, 0, 0];
+
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Sequence)]
 enum Neighbour {
@@ -108,9 +113,9 @@ impl CanvasImage {
             })
             .flat_map(|potential_edges|
                 if potential_edges.unwrap() {
-                    [255, 255, 255, 0]
+                    WHITE
                 } else {
-                    [0, 0, 0, 0]
+                    BLACK
                 }
             );
 
@@ -121,18 +126,32 @@ impl CanvasImage {
 
 
     /// ONLY for greyscale
-    pub fn greyscale_prewitt(del_x: &CanvasImage, del_y: &CanvasImage, tolerance: u32) -> CanvasImage {
-        assert!(del_x.width == del_y.width && del_x.height == del_y.height);
-        let combined = Iterator::zip(del_x.rgba_iter(), del_y.rgba_iter());
+    pub fn greyscale_gradient(
+        width: u32,
+        height: u32,
+        del_x: &Vec<f64>,
+        del_y: &Vec<f64>,
+        threshold: u32) -> CanvasImage {
+        assert_eq!(del_x.len(), del_y.len());
+        assert_eq!((width * height) as usize, del_x.len());
 
-        // combined.map(|(x, y)| {
-        //     let x_r = x.0;
-        //     let y_r = y.0;
-        //
-        //  x
-        //
-        // }).collect(
+        let combined = Iterator::zip(del_x.iter(), del_y.iter());
 
-        todo!()
+        let rgba = combined
+            // calculate the magnitude of the gradient
+            .map(|(x, y)| {
+                x.abs() + y.abs()
+            })
+            .flat_map(|gradient| {
+                if gradient > threshold as f64 {
+                    WHITE
+                } else {
+                    BLACK
+                }
+            });
+
+        let buffer = Vec::from_iter(rgba);
+
+        CanvasImage::from_vec_with_size(buffer, width, height)
     }
 }
