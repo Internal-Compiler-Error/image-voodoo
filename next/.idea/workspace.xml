@@ -5,30 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="48102704-3dec-41d6-a9b3-6619007def3b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/componenets/edge_form.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/componenets/flip_form.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/componenets/linear_transformation_form.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/componenets/scaling_form.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/componenets/shear_form.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../src/canvas_image/edge_detection.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/../Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/componenets/convolution_form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/convolution_form.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/componenets/gpt4_magic.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/gpt4_magic.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/componenets/histogram_form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/histogram_form.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/componenets/image_uploader.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/image_uploader.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/componenets/image_view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/image_view.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/componenets/operations_view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/operations_view.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/componenets/power_form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/power_form.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/componenets/rotation_form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/rotation_form.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/image_viewer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/pages/image_viewer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages/linear_transformation_form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/filtering_form.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/store.ts" beforeDir="false" afterPath="$PROJECT_DIR$/store.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../src/canvas_image.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../src/canvas_image.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/canvas_image/edge_detection.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../src/canvas_image/edge_detection.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../src/convolution.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../src/convolution.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../tests/web.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../tests/web.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../www/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../www/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../www/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/../www/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../www/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/../www/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/histogram.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../src/histogram.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/image_index.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../src/image_index.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../src/lib.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../www/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../www/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,22 +49,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_interpreter_path&quot;: &quot;node&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.fonts.default&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/Users/liangw/devel/image-voodoo/next/node_modules/typescript/lib&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "main",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_interpreter_path": "node",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "editor.preferences.fonts.default",
+    "ts.external.directory.path": "/Users/liangw/devel/image-voodoo/next/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="ReactDesignerToolWindowState">
     <option name="myId2Visible">
       <map>
@@ -149,7 +138,7 @@
       <workItem from="1680669560738" duration="1228000" />
       <workItem from="1680743952462" duration="4651000" />
       <workItem from="1680931482322" duration="58000" />
-      <workItem from="1680931576069" duration="13135000" />
+      <workItem from="1680931576069" duration="17842000" />
     </task>
     <servers />
   </component>

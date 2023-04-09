@@ -1,13 +1,15 @@
 import {Button, Card, CardActions, CardContent, Typography} from "@mui/material";
+import {useAppDispatch} from "@/store";
 
 export default function HistogramForm() {
+  const dispatch = useAppDispatch();
+  const onClick = () => {
+    dispatch({type: "app/addEqualizeOperation"})
+  }
 
   return <Card>
-    {/*<CardContent>*/}
-    {/*  <Typography variant="h4">Histogram</Typography>*/}
-    {/*</CardContent>*/}
     <CardActions>
-      <Button variant="outlined">Add Equalize To Pipeline</Button>
+      <Button variant="outlined" onClick={onClick}>Add Equalize To Pipeline</Button>
     </CardActions>
   </Card>
 }

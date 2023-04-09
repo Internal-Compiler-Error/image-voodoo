@@ -82,8 +82,8 @@ pub fn circular_indexed<'a, F, U, S>(f: &'a F, x_period: U, y_period: U) -> impl
 /// Given a image that is only defined on a finite domain, this function will return a function that
 /// returns the value of the image at the given point. If the point is outside the domain, the
 /// function will return the value reflected across the boundary of the domain.
-pub fn reflective_indexed<'a, F, U, S>(f: &'a F, x_period: U, y_period: U) -> impl Fn(S, S) -> u8 + 'a
-    where F: Fn(U, U) -> Option<u8>,
+pub fn reflective_indexed<'a, F, U, S, R>(f: &'a F, x_period: U, y_period: U) -> impl Fn(S, S) -> R + 'a
+    where F: Fn(U, U) -> Option<R>,
           U: Integer + Copy + TryFrom<S> + 'static,
           S: Integer + Copy + Signed + 'static,
           <U as TryFrom<S>>::Error: Debug {

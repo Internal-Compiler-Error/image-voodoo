@@ -1,12 +1,13 @@
 use std::ops;
 use itertools::iproduct;
+use num_traits::Zero;
 use rustfft::FftPlanner;
 use rustfft::num_complex::Complex;
 use wasm_bindgen::Clamped;
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::ImageData;
 use crate::canvas_image::CanvasImage;
-use crate::image_index::ZeroPaddedImage;
+use crate::image_index::{reflective_indexed, ZeroPaddedImage};
 use crate::utils;
 
 #[wasm_bindgen]
@@ -79,29 +80,7 @@ pub fn convolve(image: ImageData, kernel: &Kernel, border_strategy: BorderStrate
 
     ImageData::new_with_u8_clamped_array_and_sh(Clamped(&mut buffer), image.width(), image.height()).unwrap()
 }
-//
-// fn  convolve_with_fft(image: ImageData, kernel: &Kernel) -> ImageData  {
-//     let mut planner = FftPlanner::new();
-//
-//     // calculate the fft of the image
-//     let image_fft = planner.plan_fft_forward((image.width() * image.height() * 4) as usize);
-//
-//     // calculate the fft of the kernel
-//     let mut kernel_fft = kernel.data.clone();
-//     let mut kernel_fft = planner.plan_fft_forward(kernel_fft.len());
-//
-//     // convolution is equal to the multiplication of the fft of the image and the fft of the kernel
-//     iproduct!(0..image.height(), 0..image.width())
-//         .for_each(|(x, y)| {
-//         let index = (x + y * image.width()) as usize;
-//
-//         let r = (*image_fft)[index];
-//
-//
-//     });
-//
-//     todo!()
-// }
+
 
 impl CanvasImage {
     pub fn convolve(&self, kernel: &Kernel) -> Vec<f64> {
@@ -134,6 +113,77 @@ impl CanvasImage {
                 buffer.push(a_acc);
             }
         }
+        buffer
+    }
+
+
+    /// ONLY for greyscale and it zero pads, would usually doesn't make the output look too good
+    fn greyscale_convolve_with_fft(&self, kernel: &Kernel) -> Vec<f64> {
+        let new_height = (self.height() as usize + kernel.height - 1).next_power_of_two();
+        let new_width = (self.width() as usize + kernel.width - 1).next_power_of_two();
+
+        // we only care about the r channel
+        let r_access = |x, y| self.r(x, y);
+        let mut image_complex: Vec<_> = iproduct!(0..new_height, 0..new_width)
+            .map(|(x, y)| {
+                if (0 <= x && x <= self.width() as usize) &&
+                    (0 <= y && y <= self.height() as usize) {
+                    let real = r_access(x as u32, y as u32).unwrap() as f64;
+
+                    Complex::new(real, 0.0)
+                } else {
+                    Complex::zero()
+                }
+            })
+            .collect();
+
+
+        let kernel_access = |x, y| kernel.data[y as usize + x as usize * kernel.width];
+        let mut kernel_complex: Vec<_> = iproduct!(0..new_height, 0..new_width)
+            .map(|(x, y)| {
+                if (0 <= x && x <= kernel.width as usize) &&
+                    (0 <= y && y <= kernel.height as usize) {
+                    let real = kernel_access(x as u32, y as u32);
+
+                    Complex::new(real, 0.0)
+                } else {
+                    Complex::zero()
+                }
+            })
+            .collect();
+
+
+        let mut planner = FftPlanner::new();
+        let fft = planner.plan_fft_forward(new_height * new_width);
+
+        fft.process(&mut image_complex);
+        fft.process(&mut kernel_complex);
+
+        // multiply the two
+        for (image, kernel) in image_complex.iter_mut().zip(kernel_complex.iter()) {
+            *image *= kernel;
+        }
+
+        // inverse fft
+        let ifft = planner.plan_fft_inverse(new_height * new_width);
+        ifft.process(&mut image_complex);
+
+        // convert to greyscale
+        let mut buffer = vec![0f64; (self.height() * self.width() * 4) as usize];
+        for y in 0..self.height() as usize {
+            for x in 0..self.width() as usize {
+                let r = image_complex[x * new_width + y].re;
+                let g = r;
+                let b = r;
+                let a = 0f64;
+
+                buffer.push(r);
+                buffer.push(g);
+                buffer.push(b);
+                buffer.push(a);
+            }
+        }
+
         buffer
     }
 }

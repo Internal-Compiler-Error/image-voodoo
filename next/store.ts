@@ -1,7 +1,7 @@
 import {configureStore, ThunkAction, Action, PayloadAction, createSlice} from '@reduxjs/toolkit'
 import {TypedUseSelectorHook, useDispatch, useSelector} from "react-redux";
 
-import {linear_transformation} from "wasm-image-voodoo";
+import {linear_transformation, gamma_transformation, convolve, Kernel, rotate, equalize} from "wasm-image-voodoo";
 
 export type LinearOperation = {
   variant: "Linear";
@@ -31,7 +31,17 @@ export type FlipOperation = {
   axis: "horizontal" | "vertical";
 }
 
-export type Operation = LinearOperation | PowerOperation | ConvolutionOperation | RotationOperation | FlipOperation;
+export type EqualizeOperation = {
+  variant: "Equalize";
+}
+
+export type Operation =
+    LinearOperation
+    | PowerOperation
+    | ConvolutionOperation
+    | RotationOperation
+    | FlipOperation
+    | EqualizeOperation;
 
 export interface State {
   image: ImageData[];
@@ -61,13 +71,37 @@ const appSlice = createSlice({
     },
     addPowerOperation: (state, action: PayloadAction<Omit<PowerOperation, "variant">>) => {
       state.operations.push({variant: "Power", ...action.payload});
+
+
+      const [last] = state.image.slice(-1);
+
+      const image = gamma_transformation(last, action.payload.gamma);
+      state.image.push(image);
     },
     addConvolutionOperation: (state, action: PayloadAction<Omit<ConvolutionOperation, "variant">>) => {
       state.operations.push({variant: "Convolution", ...action.payload});
+
+      const [last] = state.image.slice(-1);
+      const arr = Float64Array.from(action.payload.kernel);
+      const kernel = Kernel.from_vec(arr, action.payload.width, action.payload.height);
+      const image = convolve(last, kernel, 0);
+      state.image.push(image);
     },
     addRotationOperation: (state, action: PayloadAction<Omit<RotationOperation, "variant">>) => {
       state.operations.push({variant: "Rotation", ...action.payload});
+
+      const [last] = state.image.slice(-1);
+      const image = rotate(last, action.payload.angle);
+      state.image.push(image);
     },
+    addEqualizeOperation: (state, action: PayloadAction<Omit<EqualizeOperation, "variant">>) => {
+      state.operations.push({variant: "Equalize", ...action.payload});
+
+      const [last] = state.image.slice(-1);
+      const image = equalize(last);
+      state.image.push(image);
+    },
+
     addFlipOperation: (state, action: PayloadAction<Omit<FlipOperation, "variant">>) => {
       state.operations.push({variant: "Flip", ...action.payload});
     },

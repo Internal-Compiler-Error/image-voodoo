@@ -1,3 +1,4 @@
+use std::sync::Once;
 use wasm_bindgen::prelude::*;
 
 pub mod canvas_image;
@@ -9,6 +10,16 @@ pub mod scaling;
 pub mod single_pixel_transformation;
 pub mod utils;
 mod image_index;
+
+const INIT: Once = Once::new();
+
+fn init() {
+    INIT.call_once(|| {
+       env_logger::init();
+    });
+}
+
+
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.

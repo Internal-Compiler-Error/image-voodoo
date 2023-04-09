@@ -4,9 +4,8 @@ use itertools::iproduct;
 use num_traits::{abs_sub};
 use crate::image_index::reflective_indexed;
 
-
-const WHITE: [u8; 4] = [255, 255, 255, 0];
-const BLACK: [u8; 4] = [0, 0, 0, 0];
+const WHITE: [u8; 4] = [255, 255, 255, 255];
+const BLACK: [u8; 4] = [0, 0, 0, 255];
 
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Sequence)]
@@ -101,7 +100,7 @@ impl CanvasImage {
     ///  a new image where the edges are white and the rest is black
     pub fn greyscale_laplacian_edges(&self, tolerance: u32) -> CanvasImage {
         let r_access = |x, y| self.r(x, y);
-        let r_reflect = reflective_indexed::<_, _, i64>(&r_access, self.width, self.height);
+        let r_reflect = reflective_indexed::<_, _, i64, _>(&r_access, self.width, self.height);
 
         let rgba = iproduct!(0..self.height, 0..self.width)
             .map(|(x, y)| {

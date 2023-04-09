@@ -8,8 +8,8 @@ export default function ImageView(props: { image: ImageData | undefined, }) {
 
   useEffect(() => {
     const canvas = document.getElementById("image_view_canvas") as HTMLCanvasElement;
-    canvas.width = screen.width / 3.7;
-    canvas.height = screen.height / 3.7;
+    canvas.width = screen.width / 2;
+    canvas.height = screen.height / 2;
   }, []);
 
 
@@ -25,9 +25,11 @@ export default function ImageView(props: { image: ImageData | undefined, }) {
       const canvas = document.getElementById("image_view_canvas") as HTMLCanvasElement;
 
       const scale = Math.max(canvasWidth / width, canvasHeight / height);
+      console.log({width, height, scale, canvasWidth, canvasHeight})
+
       const ctx = canvas.getContext("2d");
       assert(ctx !== null);
-      ctx.drawImage(bitmap, 0, 0, width * scale , height * scale);
+      ctx.drawImage(bitmap, 0, 0, width * scale, height * scale);
     }
 
 
@@ -42,8 +44,7 @@ export default function ImageView(props: { image: ImageData | undefined, }) {
 
   return <div>
     <canvas id="image_view_canvas"
-            style={{border: "thick dashed red"}}
-            width={canvasWidth} height={canvasHeight} >
+            style={{border: "thick dashed red"}}>
       Your browser does not support the canvas element. Imagine this to be an image. :)
     </canvas>
   </div>

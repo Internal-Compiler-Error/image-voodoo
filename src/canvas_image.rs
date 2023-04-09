@@ -141,7 +141,7 @@ impl CanvasImage {
         Histogram::from_channel_iterator(&mut a_channel)
     }
 
-    pub fn equalize(&self) -> ImageData {
+    pub fn equalize(&self) -> CanvasImage {
         let mut image = self.data.clone();
 
         let mut r_channel = self.r_iter();
@@ -163,20 +163,19 @@ impl CanvasImage {
             .as_mut_slice()
             .chunks_exact_mut(4)
             .for_each(|chunk| {
-                let r_freq = r_bucket[chunk[0] as usize];
-                let g_freq = g_bucket[chunk[1] as usize];
-                let b_freq = b_bucket[chunk[2] as usize];
+                let r_freq = r_bucket[chunk[0] as usize] * 255.0;
+                let g_freq = g_bucket[chunk[1] as usize] * 255.0;
+                let b_freq = b_bucket[chunk[2] as usize] * 255.0;
 
-                chunk[0] = (r_freq * 255.0).clamp(0.0, 255.0) as u8;
-                chunk[1] = (g_freq * 255.0).clamp(0.0, 255.0) as u8;
-                chunk[2] = (b_freq * 255.0).clamp(0.0, 255.0) as u8;
+                chunk[0] = (r_freq).clamp(0.0, 255.0) as u8;
+                chunk[1] = (g_freq).clamp(0.0, 255.0) as u8;
+                chunk[2] = (b_freq).clamp(0.0, 255.0) as u8;
+
+
+                // println!("{} {} {}", chunk[0], chunk[1], chunk[2]);
             });
 
-        ImageData::new_with_u8_clamped_array_and_sh(
-            Clamped(image.as_slice()),
-            self.width,
-            self.height,
-        ).unwrap()
+        CanvasImage::from_vec_with_size(image, self.width, self.height)
     }
 }
 
@@ -285,6 +284,7 @@ impl ZeroPaddedImage for CanvasImage {
 }
 
 mod edge_detection;
+
 pub use edge_detection::*;
 
 #[cfg(test)]
