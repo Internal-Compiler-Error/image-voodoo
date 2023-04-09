@@ -13,73 +13,82 @@
 
 <div style="display: flex; gap: 10px">
 
-    <div>
-        <p>Live Camera Feed</p>
-        <video autoplay playsinline muted id="cameraFeed"></video>
-    </div>
+    <!--    <div>-->
+    <!--        <p>Live Camera Feed</p>-->
+    <!--        <video autoplay playsinline muted id="cameraFeed"></video>-->
+    <!--    </div>-->
+
+    <!--    <div>-->
+    <!--        <p>Camera Dumped to Canvas</p>-->
+    <!--        <canvas id="liveCanvas"></canvas>-->
+    <!--    </div>-->
+
+    <!--    <div>-->
+    <!--        <p>Processed Image</p>-->
+    <!--        <canvas id="processedCanvas"></canvas>-->
+    <!--    </div>-->
 
     <div>
-        <p>Camera Dumped to Canvas</p>
-        <canvas id="liveCanvas"></canvas>
-    </div>
+        <canvas id="upload-canvas" width="1000px" height="1000px" style="border: 2px solid red;"></canvas>
+        <form autocomplete="on" id="image-upload">
+            <input id="image-input" type="file" accept="image/*">
+        </form>
 
-    <div>
-        <p>Processed Image</p>
-        <canvas id="processedCanvas"></canvas>
-    </div>
-
-    <div>
-        <canvas id="upload-canvas"></canvas>
-        <form  id="ima-upload">
-            <input type="file" accept="image/*">
+        <form autocomplete="off" id="degrees">
+            <label>
+                <input id="degree-input" type="number">
+            </label>
+            <button type="submit">Submit</button>
         </form>
     </div>
 
+<!--    <canvas id="download-canvas"></canvas>-->
+
 </div>
 
-<div id="controlDump" style="display: flex; gap: 20px">
-    <form autocomplete="off" id="linearTransformation">
-        Linear Transformation <br/>
-        <div>
-            <label for="gain">Gain</label>
-            <input type="range" id="gain" value="1" min="-10" max="10" step="0.1">
-            <span id="gainSpan">1</span>
-        </div>
+<!--<div id="controlDump" style="display: flex; gap: 20px">-->
+<!--    <form autocomplete="off" id="linearTransformation">-->
+<!--        Linear Transformation <br/>-->
+<!--        <div>-->
+<!--            <label for="gain">Gain</label>-->
+<!--            <input type="range" id="gain" value="1" min="-10" max="10" step="0.1">-->
+<!--            <span id="gainSpan">1</span>-->
+<!--        </div>-->
 
-        <div>
-            <label for="bias">Bias</label>
-            <input type="range" id="bias" value="0" min="-100" max="255">
-            <span id="biasSpan">0</span>
-        </div>
-    </form>
-    <br/>
+<!--        <div>-->
+<!--            <label for="bias">Bias</label>-->
+<!--            <input type="range" id="bias" value="0" min="-100" max="255">-->
+<!--            <span id="biasSpan">0</span>-->
+<!--        </div>-->
+<!--    </form>-->
+<!--    <br/>-->
 
-    <form autocomplete="off" id="gammaAdjustment">
-        Gamma Adjustment <br/>
-        <label for="gamma">Gamma</label>
-        <input type="number" id="gamma" value="1" min="0" max="25" step="0.05">
-        <span id="gammaSpan">1</span>
-    </form>
+<!--    <form autocomplete="off" id="gammaAdjustment">-->
+<!--        Gamma Adjustment <br/>-->
+<!--        <label for="gamma">Gamma</label>-->
+<!--        <input type="number" id="gamma" value="1" min="0" max="25" step="0.05">-->
+<!--        <span id="gammaSpan">1</span>-->
+<!--    </form>-->
 
-    <form autocomplete="off" id="convolution">
-        Convolution <br/>
-        <label for="kernel">Kernel</label>
-        <!--
-            yes yes yes, i know this is a bit stupid
-        -->
-        <div id="kernel" style="display: grid; gap: 20px;  grid-template-columns: repeat(3, 1fr);">
-            <input id="kernel(-1,-1)" type="number" value="0" min="-100" max="100" step="0.1">
-            <input id="kernel(-1,0)" type="number" value="0" min="-100" max="100" step="0.1">
-            <input id="kernel(-1,1)" type="number" value="0" min="-100" max="100" step="0.1">
-            <input id="kernel(0,-1)" type="number" value="0" min="-100" max="100" step="0.1">
-            <input id="kernel(0,0)" type="number" value="1" min="-100" max="100" step="0.1">
-            <input id="kernel(0,1)" type="number" value="0" min="-100" max="100" step="0.1">
-            <input id="kernel(1,-1)" type="number" value="0" min="-100" max="100" step="0.1">
-            <input id="kernel(1,0)" type="number" value="0" min="-100" max="100" step="0.1">
-            <input id="kernel(1,1)" type="number" value="0" min="-100" max="100" step="0.1">
-        </div>
-    </form>
-</div>
+<!--    <form autocomplete="off" id="convolution">-->
+<!--        Convolution <br/>-->
+<!--        <label for="kernel">Kernel</label>-->
+<!--        &lt;!&ndash;-->
+<!--            yes yes yes, i know this is a bit stupid-->
+<!--        &ndash;&gt;-->
+<!--        <div id="kernel" style="display: grid; gap: 20px;  grid-template-columns: repeat(3, 1fr);">-->
+<!--            <input id="kernel(-1,-1)" type="number" value="0" min="-100" max="100" step="0.1">-->
+<!--            <input id="kernel(-1,0)" type="number" value="0" min="-100" max="100" step="0.1">-->
+<!--            <input id="kernel(-1,1)" type="number" value="0" min="-100" max="100" step="0.1">-->
+<!--            <input id="kernel(0,-1)" type="number" value="0" min="-100" max="100" step="0.1">-->
+<!--            <input id="kernel(0,0)" type="number" value="1" min="-100" max="100" step="0.1">-->
+<!--            <input id="kernel(0,1)" type="number" value="0" min="-100" max="100" step="0.1">-->
+<!--            <input id="kernel(1,-1)" type="number" value="0" min="-100" max="100" step="0.1">-->
+<!--            <input id="kernel(1,0)" type="number" value="0" min="-100" max="100" step="0.1">-->
+<!--            <input id="kernel(1,1)" type="number" value="0" min="-100" max="100" step="0.1">-->
+<!--        </div>-->
+<!--    </form>-->
+<!--</div>-->
 
 <script src="./bootstrap.js"></script>
 </body>

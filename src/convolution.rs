@@ -1,4 +1,7 @@
 use std::ops;
+use itertools::iproduct;
+use rustfft::FftPlanner;
+use rustfft::num_complex::Complex;
 use wasm_bindgen::Clamped;
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::ImageData;
@@ -77,6 +80,29 @@ pub fn convolve(image: ImageData, kernel: &Kernel, border_strategy: BorderStrate
 
     ImageData::new_with_u8_clamped_array_and_sh(Clamped(&mut buffer), image.width(), image.height()).unwrap()
 }
+//
+// fn  convolve_with_fft(image: ImageData, kernel: &Kernel) -> ImageData  {
+//     let mut planner = FftPlanner::new();
+//
+//     // calculate the fft of the image
+//     let image_fft = planner.plan_fft_forward((image.width() * image.height() * 4) as usize);
+//
+//     // calculate the fft of the kernel
+//     let mut kernel_fft = kernel.data.clone();
+//     let mut kernel_fft = planner.plan_fft_forward(kernel_fft.len());
+//
+//     // convolution is equal to the multiplication of the fft of the image and the fft of the kernel
+//     iproduct!(0..image.height(), 0..image.width())
+//         .for_each(|(x, y)| {
+//         let index = (x + y * image.width()) as usize;
+//
+//         let r = (*image_fft)[index];
+//
+//
+//     });
+//
+//     todo!()
+// }
 
 #[wasm_bindgen]
 impl Kernel {

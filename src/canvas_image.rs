@@ -284,6 +284,9 @@ impl ZeroPaddedImage for CanvasImage {
     }
 }
 
+mod edge_detection;
+pub use edge_detection::*;
+
 #[cfg(test)]
 mod test {
     use crate::image_index::zero_padded;

@@ -3,7 +3,8 @@
 use wasm_bindgen_test::*;
 use web_sys::ImageData;
 use wasm_bindgen::Clamped;
-use image_voodoo::fn_extensions::CanvasImage;
+use image_voodoo::canvas_image::CanvasImage;
+use itertools::iproduct;
 
 wasm_bindgen_test_configure!(run_in_browser);
 
@@ -23,7 +24,7 @@ fn r_access_work_as_expected() {
 
 
     let image = ImageData::new_with_u8_clamped_array_and_sh(Clamped(&image), 1, 3).unwrap();
-    let image = CanvasImage::new(&image);
+    let image = CanvasImage::new(image);
 
     assert_eq!(image.r(0, 0), Some(0));
     assert_eq!(image.r(1, 0), Some(3));
@@ -42,7 +43,7 @@ fn g_access_work_as_expected() {
 
 
     let image = ImageData::new_with_u8_clamped_array_and_sh(Clamped(&image), 1, 3).unwrap();
-    let image = CanvasImage::new(&image);
+    let image = CanvasImage::new(image);
 
     assert_eq!(image.g(0, 0), Some(1));
     assert_eq!(image.g(1, 0), Some(4));

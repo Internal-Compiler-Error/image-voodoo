@@ -29,8 +29,12 @@ float-cmp = "0.9.0"
 num = "0.4.0"
 itertools = "0.10.5"
 color-eyre = "0.6.2"
+nalgebra = "0.32.2"
+rustfft = "6.1.0"
+enum-iterator = "1.4.0"
 
 [dev-dependencies]
+image = "0.24.6"
 wasm-bindgen-test = "0.3.34"
 
 [profile.release]
