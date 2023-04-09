@@ -29,6 +29,7 @@ export default function ImageView(props: { image: ImageData | undefined, }) {
 
       const ctx = canvas.getContext("2d");
       assert(ctx !== null);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(bitmap, 0, 0, width * scale, height * scale);
     }
 

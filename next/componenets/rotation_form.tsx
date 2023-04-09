@@ -11,12 +11,19 @@ import {
   Typography
 } from "@mui/material";
 import {ChangeEvent, useState} from "react";
+import {useAppDispatch} from "@/store";
 
 export default function RotationForm() {
   const [degrees, setDegrees] = useState<number>(0);
+  const dispatch = useAppDispatch();
 
   const onSliderChange = (e: Event, newValue: number | number[]) => {
     setDegrees(newValue as number);
+  }
+
+  const onClick = () => {
+
+    dispatch({type: "app/addRotationOperation", payload: {angle: degrees}})
   }
 
   const onTextFieldChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -35,8 +42,6 @@ export default function RotationForm() {
 
   return <Card>
     <CardContent>
-      {/*<Typography variant="h4">Rotation</Typography>*/}
-
       <Grid container spacing={4} alignContent="center">
         <Grid item xs>
           <Slider
@@ -63,17 +68,17 @@ export default function RotationForm() {
           <TextField
               type={"number"}
               value={degrees}
-                     onChange={onTextFieldChange}
-                     inputProps={{
-                       step: 0.1,
-                     }}
+              onChange={onTextFieldChange}
+              inputProps={{
+                step: 0.1,
+              }}
           />
         </Grid>
 
       </Grid>
     </CardContent>
     <CardActions>
-      <Button variant="outlined">Add To Pipeline</Button>
+      <Button variant="outlined" onClick={onClick}>Add To Pipeline</Button>
     </CardActions>
   </Card>
 }

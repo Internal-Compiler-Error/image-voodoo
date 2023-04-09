@@ -9,6 +9,7 @@ use std::collections::HashSet;
 use std::fmt::format;
 use wasm_bindgen::Clamped;
 use web_sys::ImageData;
+use wasm_bindgen::prelude::*;
 
 pub enum Interpolation {
     Nearest,
@@ -89,6 +90,19 @@ pub fn scale_bilinear(image: &CanvasImage, new_width: u32, new_height: u32) -> C
     CanvasImage::from_vec_with_size(buffer, new_width, new_height)
 }
 
+#[wasm_bindgen]
+pub fn scale_via_bilinear(image: ImageData, width_factor: u32, height_factor: u32) -> ImageData {
+    let image = CanvasImage::new(image);
+
+    let new_width = image.width() * width_factor;
+    let new_height = image.height() * height_factor;
+
+
+    let scaled = scale_bilinear(&image, new_width, new_height);
+    scaled.into()
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -106,30 +120,27 @@ mod tests {
 
         #[rustfmt::skip]
             let image: Vec<u8> = vec![
-            10, 10, 10, 0,       20, 20, 20, 0,
-            30, 30, 30, 0,       40, 40, 40, 0,
+            10, 10, 10, 0, 20, 20, 20, 0,
+            30, 30, 30, 0, 40, 40, 40, 0,
         ];
 
         let image = CanvasImage::from_vec_with_size(image, 2, 2);
         let scaled = scale_bilinear(&image, 4, 4);
 
         #[rustfmt::skip]
-        let expected: Vec<u8> = vec![
+            let expected: Vec<u8> = vec![
             10, 10, 10, 0,
             12, 12, 12, 0,
             17, 17, 17, 0,
             20, 20, 20, 0,
-            
             15, 15, 15, 0,
             17, 17, 17, 0,
             22, 22, 22, 0,
             25, 25, 25, 0,
-            
             25, 25, 25, 0,
             27, 27, 27, 0,
             32, 32, 32, 0,
             35, 35, 35, 0,
-            
             30, 30, 30, 0,
             32, 32, 32, 0,
             37, 37, 37, 0,

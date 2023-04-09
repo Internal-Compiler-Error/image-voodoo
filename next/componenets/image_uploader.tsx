@@ -77,8 +77,8 @@ export default function ImageUploader() {
     <ImageCanvas/>
 
 
-    <CardActions>
-      <Button variant="outlined">Upload!</Button>
-    </CardActions>
+    {/*<CardActions>*/}
+    {/*  <Button variant="outlined">Upload!</Button>*/}
+    {/*</CardActions>*/}
   </Card>
 }

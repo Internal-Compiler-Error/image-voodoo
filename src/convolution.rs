@@ -84,7 +84,7 @@ pub fn convolve(image: ImageData, kernel: &Kernel, border_strategy: BorderStrate
 
 impl CanvasImage {
     pub fn convolve(&self, kernel: &Kernel) -> Vec<f64> {
-        let mut buffer = vec![0f64; (self.height() * self.width() * 4) as usize];
+        let mut buffer = Vec::with_capacity((self.height() * self.width() * 4) as usize);
         for y in 0..self.height() as isize {
             for x in 0..self.width() as isize {
                 let mut r_acc = 0f64;
@@ -103,7 +103,7 @@ impl CanvasImage {
                         r_acc += kernel[(i, j)] * r as f64;
                         g_acc += kernel[(i, j)] * g as f64;
                         b_acc += kernel[(i, j)] * b as f64;
-                        a_acc += kernel[(i, j)] * a as f64;
+                        a_acc = a as f64;
                     }
                 }
 

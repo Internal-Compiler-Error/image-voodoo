@@ -91,6 +91,7 @@ pub fn reflective_indexed<'a, F, U, S, R>(f: &'a F, x_period: U, y_period: U) ->
         U::try_from(abs(x)).unwrap()
     };
 
+    let one = U::one();
 
     move |x, y| {
         let zero = U::zero();
@@ -126,5 +127,31 @@ pub fn reflective_indexed<'a, F, U, S, R>(f: &'a F, x_period: U, y_period: U) ->
         };
 
         f(x % x_period, y % y_period).unwrap()
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_reflective_indexing() {
+        // a function that is only defined on [0, 4) x [0, 4)
+        let f = |x: u32, y: u32| {
+            if x < 4 && y < 4 {
+                Some(x + y)
+            } else {
+                None
+            }
+        };
+
+        let g = reflective_indexed::<_, _, i32, _>(&f, 4, 4);
+
+        for i in -4..4 {
+            for j in -4..4 {
+                println!("g({}, {}) = {}", i, j, g(i, j));
+            }
+        }
     }
 }

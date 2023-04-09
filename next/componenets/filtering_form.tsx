@@ -1,6 +1,12 @@
-import {Button, Card, CardActions, CardContent, Typography} from "@mui/material";
+import {Button, Card, CardActions, CardContent, Grid, Typography} from "@mui/material";
 
 export default function FilteringForm() {
+  const bigButtons = {
+    width: "100%",
+    height: "100%",
+  }
+
+
   return <Card>
     {/*<CardContent>*/}
     {/*  <Typography variant="body1">*/}
@@ -8,10 +14,29 @@ export default function FilteringForm() {
     {/*  </Typography>*/}
     {/*</CardContent>*/}
     <CardActions>
-      <Button variant={"outlined"}>Add Min Filter</Button>
-      <Button variant={"outlined"}>Add Median Filter</Button>
-      <Button variant={"outlined"}>Add Max Filter</Button>
-      <Button variant={"outlined"}>Add 3x3 Gaussian</Button>
+      <Grid container
+            direction="row"
+            justifyContent="space-between"
+            alignItems="stretch"
+            spacing={2}>
+
+        <Grid item xs>
+          <Button variant={"outlined"} style={bigButtons}>Add Min Filter</Button>
+        </Grid>
+
+        <Grid item xs>
+          <Button variant={"outlined"} style={bigButtons}>Add Median Filter</Button>
+        </Grid>
+
+        <Grid item xs>
+          <Button variant={"outlined"} style={bigButtons}>Add Max Filter</Button>
+        </Grid>
+
+        <Grid item xs>
+          <Button variant={"outlined"} style={bigButtons}>Add 3x3 Gaussian</Button>
+        </Grid>
+      </Grid>
+
     </CardActions>
   </Card>
 }

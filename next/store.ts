@@ -1,7 +1,19 @@
 import {configureStore, ThunkAction, Action, PayloadAction, createSlice} from '@reduxjs/toolkit'
 import {TypedUseSelectorHook, useDispatch, useSelector} from "react-redux";
 
-import {linear_transformation, gamma_transformation, convolve, Kernel, rotate, equalize} from "wasm-image-voodoo";
+import {
+  linear_transformation,
+  gamma_transformation,
+  convolve,
+  Kernel,
+  rotate,
+  equalize,
+  scale_via_bilinear,
+  init,
+  laplacian_edge,
+} from "wasm-image-voodoo";
+
+init();
 
 export type LinearOperation = {
   variant: "Linear";
@@ -21,6 +33,12 @@ export type ConvolutionOperation = {
   height: number;
 }
 
+export type ScaleOperation = {
+  variant: "Scale";
+  width_factor: number;
+  height_factor: number;
+}
+
 export type RotationOperation = {
   variant: "Rotation";
   angle: number;
@@ -35,13 +53,19 @@ export type EqualizeOperation = {
   variant: "Equalize";
 }
 
+export type LaplacianEdgeOperation = {
+  variant: "LaplacianEdge";
+}
+
 export type Operation =
     LinearOperation
     | PowerOperation
     | ConvolutionOperation
     | RotationOperation
     | FlipOperation
-    | EqualizeOperation;
+    | EqualizeOperation
+    | ScaleOperation
+    | LaplacianEdgeOperation;
 
 export interface State {
   image: ImageData[];
@@ -78,6 +102,17 @@ const appSlice = createSlice({
       const image = gamma_transformation(last, action.payload.gamma);
       state.image.push(image);
     },
+
+    addScaleOperation: (state, action: PayloadAction<Omit<ScaleOperation, "variant">>) => {
+      state.operations.push({variant: "Scale", ...action.payload});
+
+      const [last] = state.image.slice(-1);
+      const {width_factor, height_factor} = action.payload;
+
+      const image = scale_via_bilinear(last, width_factor, height_factor);
+      state.image.push(image);
+    },
+
     addConvolutionOperation: (state, action: PayloadAction<Omit<ConvolutionOperation, "variant">>) => {
       state.operations.push({variant: "Convolution", ...action.payload});
 
@@ -99,6 +134,14 @@ const appSlice = createSlice({
 
       const [last] = state.image.slice(-1);
       const image = equalize(last);
+      state.image.push(image);
+    },
+
+    addLaplacianEdgeOperation: (state, action: PayloadAction<Omit<LaplacianEdgeOperation, "variant">>) => {
+      state.operations.push({variant: "LaplacianEdge", ...action.payload});
+
+      const [last] = state.image.slice(-1);
+      const image = laplacian_edge(last);
       state.image.push(image);
     },
 

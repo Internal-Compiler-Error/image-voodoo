@@ -1,5 +1,6 @@
 use std::sync::Once;
 use wasm_bindgen::prelude::*;
+use crate::utils::set_panic_hook;
 
 pub mod canvas_image;
 pub mod convolution;
@@ -13,9 +14,10 @@ mod image_index;
 
 const INIT: Once = Once::new();
 
-fn init() {
+#[wasm_bindgen]
+pub fn init() {
     INIT.call_once(|| {
-       env_logger::init();
+        set_panic_hook();
     });
 }
 

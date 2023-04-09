@@ -10,8 +10,10 @@ import {
   Grid,
   TextField, Paper, Card, CardContent, CardActions, Box, Divider
 } from "@mui/material";
+import {useAppDispatch} from "@/store";
 
 export default function ConvolutionForm() {
+  const dispatch = useAppDispatch();
   const [rowNum, setRowNum] = useState(3);
   const [colNum, setColNum] = useState(3);
   const [grid, setGrid] = useState<number[]>(() => {
@@ -47,9 +49,8 @@ export default function ConvolutionForm() {
   };
 
   const handleButtonClick = () => {
-    const rowMajorOrder = grid
-        .filter(num => !isNaN(num));
-    console.log(rowMajorOrder);
+    console.log({grid, rowNum, colNum});
+    dispatch({type: "app/addConvolutionOperation", payload: {kernel: grid, width: rowNum, height: colNum}});
   };
 
   return (
