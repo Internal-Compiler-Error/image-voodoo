@@ -3,7 +3,6 @@ use web_sys::ImageData;
 use crate::canvas_image::{CanvasImage, ChannelIterator};
 
 use wasm_bindgen::prelude::*;
-use crate::{init};
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct Histogram {
@@ -43,8 +42,6 @@ impl Histogram {
 
     /// Build a *new* histogram that is the cumulative histogram of the current histogram
     pub fn cumulative(&self) -> Histogram {
-        // init();
-
         // cumulative and scans are the same thing
         let cumulative: Vec<_> =
             self.buckets.iter().scan(0f64, |sum, e| {
