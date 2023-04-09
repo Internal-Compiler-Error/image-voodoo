@@ -12,7 +12,7 @@ mod iterator;
 
 pub use iterator::*;
 use crate::image_index;
-use crate::image_index::{CircularIndexedImage, ZeroPaddedImage};
+use crate::image_index::{CircularIndexedImage, ReflectiveIndexedImage, ZeroPaddedImage};
 
 /// Consumes the canvas image and returns an ImageData for the browser
 impl Into<ImageData> for CanvasImage {
@@ -181,48 +181,24 @@ impl CanvasImage {
 
 impl CircularIndexedImage for CanvasImage {
     fn r(&self, x: i32, y: i32) -> u8 {
-        if x < 0 || y < 0 {
-            return 0;
-        }
-
-
-        let width = self.width();
-        let height = self.height();
-
         let f = |x, y| self.r(x, y);
-
-
-        let value = image_index::circular_indexed(&f, width, height)(x, y);
-        value
+        let f = image_index::circular_indexed(&f, self.width, self.height);
+        f(x, y)
     }
 
     fn g(&self, x: i32, y: i32) -> u8 {
-        if x < 0 || y < 0 {
-            return 0;
-        }
-
-
         let f = |x, y| self.g(x, y);
         let f = image_index::circular_indexed(&f, self.width, self.height);
         f(x, y)
     }
 
     fn b(&self, x: i32, y: i32) -> u8 {
-        if x < 0 || y < 0 {
-            return 0;
-        }
-
-
         let f = |x, y| self.b(x, y);
         let f = image_index::circular_indexed(&f, self.width, self.height);
         f(x, y)
     }
 
     fn a(&self, x: i32, y: i32) -> u8 {
-        if x < 0 || y < 0 {
-            return 0;
-        }
-
         let f = |x, y| self.a(x, y);
         let f = image_index::circular_indexed(&f, self.width, self.height);
         f(x, y)
@@ -283,8 +259,36 @@ impl ZeroPaddedImage for CanvasImage {
     }
 }
 
-mod edge_detection;
+impl ReflectiveIndexedImage for CanvasImage {
+    fn r(&self, x: i32, y: i32) -> u8 {
+        let f = |x, y| self.r(x, y);
+        let f = image_index::reflective_indexed(&f, self.width, self.height);
+        f(x, y)
+    }
 
+    fn g(&self, x: i32, y: i32) -> u8 {
+        let f = |x, y| self.g(x, y);
+        let f = image_index::reflective_indexed(&f, self.width, self.height);
+        f(x, y)
+    }
+
+    fn b(&self, x: i32, y: i32) -> u8 {
+        let f = |x, y| self.b(x, y);
+        let f = image_index::reflective_indexed(&f, self.width, self.height);
+        f(x, y)
+    }
+
+    fn a(&self, x: i32, y: i32) -> u8 {
+        let f = |x, y| self.a(x, y);
+        let f = image_index::reflective_indexed(&f, self.width, self.height);
+        f(x, y)
+    }
+}
+
+mod edge_detection;
+mod filters;
+
+pub use filters::*;
 pub use edge_detection::*;
 
 #[cfg(test)]
