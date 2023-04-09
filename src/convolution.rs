@@ -7,7 +7,7 @@ use wasm_bindgen::Clamped;
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::ImageData;
 use crate::canvas_image::CanvasImage;
-use crate::image_index::{reflective_indexed, ZeroPaddedImage};
+use crate::image_index::{CircularIndexedImage, ReflectiveIndexedImage, ZeroPaddedImage};
 use crate::utils;
 
 #[wasm_bindgen]
@@ -18,72 +18,69 @@ pub struct Kernel {
 }
 
 #[wasm_bindgen]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum BorderStrategy {
     Zero,
     Circular,
+    Reflective,
 }
+
 
 #[wasm_bindgen]
 pub fn convolve(image: ImageData, kernel: &Kernel, border_strategy: BorderStrategy) -> ImageData {
     utils::set_panic_hook();
 
     let image = CanvasImage::new(image);
-    let mut buffer = Vec::with_capacity((image.height() * image.width() * 4) as usize);
 
+    let convolved = image.convolve(kernel, border_strategy);
 
-    match border_strategy {
-        BorderStrategy::Zero => {
-            for y in 0..image.height() as isize {
-                for x in 0..image.width() as isize {
-                    let mut r_acc = 0f64;
-                    let mut g_acc = 0f64;
-                    let mut b_acc = 0f64;
-                    let mut a_acc = 0f64;
+    // clamp and convert to u8
+    let rgba = convolved
+        .as_slice()
+        .chunks_exact(4)
+        .flat_map(|chunk| {
+            let r = chunk[0].clamp(0.0, 255.0) as u8;
+            let g = chunk[1].clamp(0.0, 255.0) as u8;
+            let b = chunk[2].clamp(0.0, 255.0) as u8;
+            let a = chunk[3].clamp(0.0, 255.0) as u8;
 
+            [r, g, b, a]
+        });
 
-                    // let r = image.r(x as u32, y as u32).unwrap_or(0);
-                    // let g = image.g(x as u32, y as u32).unwrap_or(0);
-                    // let b = image.b(x as u32, y as u32).unwrap_or(0);
-                    // let a = image.a(x as u32, y as u32).unwrap_or(0);
-
-
-                    for i in -((kernel.height as isize) / 2)..=(kernel.height / 2) as isize {
-                        for j in -((kernel.width as isize) / 2)..=(kernel.width / 2) as isize {
-                            let r = ZeroPaddedImage::r(&image, (x - i) as i32, (y - j) as i32);
-                            let g = ZeroPaddedImage::g(&image, (x - i) as i32, (y - j) as i32);
-                            let b = ZeroPaddedImage::b(&image, (x - i) as i32, (y - j) as i32);
-                            let a = ZeroPaddedImage::a(&image, (x - i) as i32, (y - j) as i32);
-
-                            r_acc += kernel[(i, j)] * r as f64;
-                            g_acc += kernel[(i, j)] * g as f64;
-                            b_acc += kernel[(i, j)] * b as f64;
-                            a_acc += kernel[(i, j)] * a as f64;
-                        }
-                    }
-
-                    buffer.push(r_acc.clamp(0.0, 255.0) as u8);
-                    buffer.push(g_acc.clamp(0.0, 255.0) as u8);
-                    buffer.push(b_acc.clamp(0.0, 255.0) as u8);
-                    buffer.push(a_acc.clamp(0.0, 255.0) as u8);
-
-
-                    // buffer.push(r);
-                    // buffer.push(g);
-                    // buffer.push(b);
-                    // buffer.push(a);
-                }
-            }
-        }
-        BorderStrategy::Circular => todo!(),
-    }
-
+    let mut buffer = Vec::from_iter(rgba);
     ImageData::new_with_u8_clamped_array_and_sh(Clamped(&mut buffer), image.width(), image.height()).unwrap()
 }
 
 
 impl CanvasImage {
-    pub fn convolve(&self, kernel: &Kernel) -> Vec<f64> {
+    /// Convolve the image with a kernel, using the specified border strategy.
+    pub fn convolve(&self, kernel: &Kernel, border_strategy: BorderStrategy) -> Vec<f64> {
+        // some rust lawyer please tell me how to do this better
+        let (r, g, b, a): (&dyn Fn(&CanvasImage, i32, i32) -> u8,
+                           &dyn Fn(&CanvasImage, i32, i32) -> u8,
+                           &dyn Fn(&CanvasImage, i32, i32) -> u8,
+                           &dyn Fn(&CanvasImage, i32, i32) -> u8) = match border_strategy {
+            BorderStrategy::Zero => (
+                &ZeroPaddedImage::r,
+                &ZeroPaddedImage::g,
+                &ZeroPaddedImage::b,
+                &ZeroPaddedImage::a,
+            ),
+            BorderStrategy::Reflective => (
+                &ReflectiveIndexedImage::r,
+                &ReflectiveIndexedImage::g,
+                &ReflectiveIndexedImage::b,
+                &ReflectiveIndexedImage::a,
+            ),
+            BorderStrategy::Circular => (
+                &CircularIndexedImage::r,
+                &CircularIndexedImage::g,
+                &CircularIndexedImage::b,
+                &CircularIndexedImage::a,
+            ),
+        };
+
+
         let mut buffer = Vec::with_capacity((self.height() * self.width() * 4) as usize);
         for y in 0..self.height() as isize {
             for x in 0..self.width() as isize {
@@ -95,15 +92,18 @@ impl CanvasImage {
 
                 for i in -((kernel.height as isize) / 2)..=(kernel.height / 2) as isize {
                     for j in -((kernel.width as isize) / 2)..=(kernel.width / 2) as isize {
-                        let r = ZeroPaddedImage::r(self, (x - i) as i32, (y - j) as i32);
-                        let g = ZeroPaddedImage::g(self, (x - i) as i32, (y - j) as i32);
-                        let b = ZeroPaddedImage::b(self, (x - i) as i32, (y - j) as i32);
-                        let a = ZeroPaddedImage::a(self, (x - i) as i32, (y - j) as i32);
+                        let r_intensity = r(&self, (x - i) as i32, (y - j) as i32);
+                        let g_intensity = g(&self, (x - i) as i32, (y - j) as i32);
+                        let b_itensity = b(&self, (x - i) as i32, (y - j) as i32);
+                        let a_intensity = a(&self, (x - i) as i32, (y - j) as i32);
 
-                        r_acc += kernel[(i, j)] * r as f64;
-                        g_acc += kernel[(i, j)] * g as f64;
-                        b_acc += kernel[(i, j)] * b as f64;
-                        a_acc = a as f64;
+                        r_acc += kernel[(i, j)] * r_intensity as f64;
+                        g_acc += kernel[(i, j)] * g_intensity as f64;
+                        b_acc += kernel[(i, j)] * b_itensity as f64;
+
+                        // i don't know where in the world would you actually want to mess with
+                        // the alpha channel, in a convolution
+                        a_acc += a_intensity as f64;
                     }
                 }
 
@@ -113,6 +113,7 @@ impl CanvasImage {
                 buffer.push(a_acc);
             }
         }
+
         buffer
     }
 
