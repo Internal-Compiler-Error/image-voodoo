@@ -1,33 +1,38 @@
 import {Button, Card, CardActions, CardContent, FormControl, Grid, TextField} from "@mui/material";
 import {ChangeEvent, useState} from "react";
+import {useAppDispatch} from "@/store";
 
 export default function ShearForm() {
-  const [xShear, setXShear] = useState(0);
-  const [yShear, setYShear] = useState(0);
+  const [lambda, setLambda] = useState(0);
+  const [miu, setMiu] = useState(0);
+  const dispatch = useAppDispatch();
 
 
-  const onXShearChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setXShear(parseFloat(e.target.value));
+  const onLambdaChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setLambda(parseFloat(e.target.value));
   }
 
-  const onYShearChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setYShear(parseFloat(e.target.value));
+  const onMiuChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setMiu(parseFloat(e.target.value));
   }
+
+  const doShear = () => {
+    dispatch({type: "app/addShearOperation", payload: {lambda: lambda, miu: miu}});
+  }
+
 
   return <Card>
     <CardContent>
       <Grid container spacing={2}>
         <Grid item xs>
           <FormControl fullWidth>
-
-            <TextField type="number" label="Shear in horizontal" value={xShear} onChange={onXShearChange}/>
-
+            <TextField type="number" label="λ" value={lambda} onChange={onLambdaChange}/>
           </FormControl>
         </Grid>
 
         <Grid item xs>
           <FormControl fullWidth>
-            <TextField type="number" label="Shear in vertical" value={yShear} onChange={onYShearChange}/>
+            <TextField type="number" label="μ" value={miu} onChange={onMiuChange}/>
           </FormControl>
         </Grid>
       </Grid>
@@ -35,7 +40,7 @@ export default function ShearForm() {
 
     </CardContent>
     <CardActions>
-      <Button variant="outlined">Add Shear To Pipeline</Button>
+      <Button variant="outlined" onClick={doShear}>Add Shear To Pipeline</Button>
     </CardActions>
   </Card>
 }

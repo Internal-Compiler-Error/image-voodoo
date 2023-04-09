@@ -11,6 +11,10 @@ import {
   scale_via_bilinear,
   init,
   laplacian_edge,
+  laplacian_of_gaussian_edge,
+  shear_wasm,
+  flip_along_x_axis,
+  flip_along_y_axis
 } from "wasm-image-voodoo";
 
 init();
@@ -20,6 +24,12 @@ export type LinearOperation = {
   bias: number;
   gain: number;
 };
+
+export type ShearOpration = {
+  variant: "Shear";
+  lambda: number;
+  miu: number;
+}
 
 export type PowerOperation = {
   variant: "Power";
@@ -46,7 +56,7 @@ export type RotationOperation = {
 
 export type FlipOperation = {
   variant: "Flip";
-  axis: "horizontal" | "vertical";
+  axis: "x" | "y";
 }
 
 export type EqualizeOperation = {
@@ -55,6 +65,7 @@ export type EqualizeOperation = {
 
 export type LaplacianEdgeOperation = {
   variant: "LaplacianEdge";
+  threshold: number;
 }
 
 export type Operation =
@@ -65,7 +76,8 @@ export type Operation =
     | FlipOperation
     | EqualizeOperation
     | ScaleOperation
-    | LaplacianEdgeOperation;
+    | LaplacianEdgeOperation
+    | ShearOpration;
 
 export interface State {
   image: ImageData[];
@@ -102,7 +114,6 @@ const appSlice = createSlice({
       const image = gamma_transformation(last, action.payload.gamma);
       state.image.push(image);
     },
-
     addScaleOperation: (state, action: PayloadAction<Omit<ScaleOperation, "variant">>) => {
       state.operations.push({variant: "Scale", ...action.payload});
 
@@ -112,7 +123,6 @@ const appSlice = createSlice({
       const image = scale_via_bilinear(last, width_factor, height_factor);
       state.image.push(image);
     },
-
     addConvolutionOperation: (state, action: PayloadAction<Omit<ConvolutionOperation, "variant">>) => {
       state.operations.push({variant: "Convolution", ...action.payload});
 
@@ -136,17 +146,40 @@ const appSlice = createSlice({
       const image = equalize(last);
       state.image.push(image);
     },
-
     addLaplacianEdgeOperation: (state, action: PayloadAction<Omit<LaplacianEdgeOperation, "variant">>) => {
       state.operations.push({variant: "LaplacianEdge", ...action.payload});
 
       const [last] = state.image.slice(-1);
-      const image = laplacian_edge(last);
+      const {threshold} = action.payload;
+      const image = laplacian_edge(last, threshold);
       state.image.push(image);
     },
+    addLaplacianOfGaussianEdgeOperation: (state, action: PayloadAction<Omit<LaplacianEdgeOperation, "variant">>) => {
+      const [last] = state.image.slice(-1);
+      const {threshold} = action.payload;
+      const image = laplacian_of_gaussian_edge(last, threshold);
+      state.image.push(image);
+    },
+    addShearOperation: (state, action: PayloadAction<Omit<ShearOpration, "variant">>) => {
+      state.operations.push({variant: "Shear", ...action.payload});
 
+      const [last] = state.image.slice(-1);
+      const {lambda, miu} = action.payload;
+      const image = shear_wasm(last, lambda, miu);
+      state.image.push(image);
+    },
     addFlipOperation: (state, action: PayloadAction<Omit<FlipOperation, "variant">>) => {
       state.operations.push({variant: "Flip", ...action.payload});
+      const [last] = state.image.slice(-1);
+      const {axis} = action.payload;
+
+      if (axis === "x") {
+        const image = flip_along_x_axis(last);
+        state.image.push(image);
+      } else {
+        const image = flip_along_y_axis(last);
+        state.image.push(image);
+      }
     },
     removeOperation: (state) => {
       state.operations.pop();

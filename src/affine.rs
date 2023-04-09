@@ -268,6 +268,13 @@ pub fn rotate(image: ImageData, degree: f64) -> ImageData {
     rotated.into()
 }
 
+#[wasm_bindgen]
+pub fn shear_wasm(image: ImageData, lambda: f64, miu: f64) -> ImageData {
+    let canvas_image = CanvasImage::new(image);
+
+    let sheared = shear(&canvas_image, lambda, miu);
+    sheared.into()
+}
 
 #[cfg(test)]
 mod tests {

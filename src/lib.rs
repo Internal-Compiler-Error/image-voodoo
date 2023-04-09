@@ -10,6 +10,7 @@ pub mod affine;
 pub mod scaling;
 pub mod single_pixel_transformation;
 pub mod utils;
+pub mod flip;
 mod image_index;
 
 const INIT: Once = Once::new();

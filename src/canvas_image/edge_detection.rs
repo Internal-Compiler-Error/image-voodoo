@@ -2,7 +2,7 @@ use crate::canvas_image::CanvasImage;
 use enum_iterator::Sequence;
 use itertools::iproduct;
 use num_traits::{abs_sub};
-use crate::convolution::Kernel;
+use crate::convolution::{BorderStrategy, Kernel};
 use crate::image_index::reflective_indexed;
 use wasm_bindgen::prelude::*;
 use web_sys::ImageData;
@@ -186,22 +186,20 @@ impl CanvasImage {
 
 
     pub fn laplacian_edge(&self, threshold: f64) -> CanvasImage {
-        #[rustfmt::skip]
-            let kernel = Kernel::from_vec(vec![
+        let kernel = Kernel::from_vec(vec![
             1.0, 1.0, 1.0,
             1.0, -8.0, 1.0,
             1.0, 1.0, 1.0,
         ], 3, 3);
 
-        let convolved = self.convolve(&kernel);
+        let convolved = self.convolve(&kernel, BorderStrategy::Reflective);
 
         let edge_map = CanvasImage::greyscale_laplacian_edges(&convolved, self.width, self.height, threshold);
         edge_map
     }
 
     pub fn laplacian_of_gaussian_edge(&self, threshold: f64) -> CanvasImage {
-        #[rustfmt::skip]
-            let kernel = Kernel::from_vec(vec![
+        let kernel = Kernel::from_vec(vec![
             0.0, 0.0, -01.0, 0.0, 0.0,
             0.0, -1.0, -02.0, -1.0, 0.0,
             -1.0, -2.0, 16.0, -2.0, -1.0,
@@ -209,10 +207,50 @@ impl CanvasImage {
             0.0, 0.0, -01.0, 0.0, 0.0,
         ], 5, 5);
 
-        let convolved = self.convolve(&kernel);
+        let convolved = self.convolve(&kernel, BorderStrategy::Reflective);
 
         let edge_map = CanvasImage::greyscale_laplacian_edges(&convolved, self.width, self.height, threshold);
         edge_map
+    }
+
+    // TODO: add noise reduction and edge enhancement
+    pub fn sobel_edge(&self, threshold: u32) -> CanvasImage {
+        let kernel_x = Kernel::from_vec(vec![
+            -1.0, 0.0, 1.0,
+            -2.0, 0.0, 2.0,
+            -1.0, 0.0, 1.0,
+        ], 3, 3);
+
+        let kernel_y = Kernel::from_vec(vec![
+            -1.0, -2.0, -1.0,
+            0.0, 0.0, 0.0,
+            1.0, 2.0, 1.0,
+        ], 3, 3);
+
+        let del_x = self.convolve(&kernel_x, BorderStrategy::Reflective);
+        let del_y = self.convolve(&kernel_y, BorderStrategy::Reflective);
+
+        CanvasImage::greyscale_gradient(self.width, self.height, &del_x, &del_y, threshold)
+    }
+
+    // TODO: add noise reduction and edge enhancement
+    pub fn prewitt_edge(&self, threshold: u32) -> CanvasImage {
+        let kernel_x = Kernel::from_vec(vec![
+            -1.0, 0.0, 1.0,
+            -1.0, 0.0, 1.0,
+            -1.0, 0.0, 1.0,
+        ], 3, 3);
+
+        let kernel_y = Kernel::from_vec(vec![
+            -1.0, -1.0, -1.0,
+            0.0, 0.0, 0.0,
+            1.0, 1.0, 1.0,
+        ], 3, 3);
+
+        let del_x = self.convolve(&kernel_x, BorderStrategy::Reflective);
+        let del_y = self.convolve(&kernel_y, BorderStrategy::Reflective);
+
+        CanvasImage::greyscale_gradient(self.width, self.height, &del_x, &del_y, threshold)
     }
 }
 

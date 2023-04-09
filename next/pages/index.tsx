@@ -12,7 +12,7 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  ThemeProvider, createTheme, Box, Grid
+  ThemeProvider, createTheme, Box, Grid, Paper
 } from "@mui/material";
 import OperationsView from "@/componenets/operations_view";
 import RotationForm from "@/componenets/rotation_form";
@@ -21,7 +21,7 @@ import HistogramForm from "@/componenets/histogram_form";
 import GPT4 from "@/componenets/gpt4_magic";
 import FilteringForm from "@/componenets/filtering_form";
 import EdgeForm from "@/componenets/edge_form";
-import {pink} from "@mui/material/colors";
+import {green, pink, purple} from "@mui/material/colors";
 import ImageViewer from "@/pages/image_viewer";
 import ImageUploader from "@/componenets/image_uploader";
 import ShearForm from "@/componenets/shear_form";
@@ -35,132 +35,150 @@ const LiveView = connect((state: State) => {
   }
 })(OperationsView);
 
+
+const primaryGreen = green[500];
+const accentGreen = green.A200;
+const darkGreen = green[900];
+const primaryPurple = purple[500];
+const accentPurple = purple.A200;
+const darkPurple = purple[900];
+
 const darkTheme = createTheme({
   palette: {
     primary: {
-      main: pink[400],
+      light: accentPurple,
+      main: primaryPurple,
+      dark: darkPurple,
+      contrastText: "#fff"
     },
+    mode: "dark",
+    secondary: {
+      light: accentGreen,
+      main: primaryGreen,
+      dark: darkGreen,
+      contrastText: "#fff"
+    }
   }
 })
 
 export default function Home() {
   return <ThemeProvider theme={darkTheme}>
-    {/*<Paper variant="outlined">*/}
-    <Container>
-      <Provider store={store}>
-        <Typography variant="h1" align="center">Image Voodoo</Typography>
+    <Paper variant="outlined">
+      <Container>
+        <Provider store={store}>
+          <Typography variant="h1" align="center">Image Voodoo</Typography>
 
-        <Typography variant="body1">You maybe have heard of ImageMagick, now get ready for Image Voodoo. It does the
-          same
-          {/* eslint-disable-next-line react/no-unescaped-entities */}
-          thing, but it's worse.
-        </Typography>
-        <Divider/>
+          <Typography variant="body1">You maybe have heard of ImageMagick, now get ready for Image Voodoo. It does the
+            same
+            {/* eslint-disable-next-line react/no-unescaped-entities */}
+            thing, but it's worse.
+          </Typography>
+          <Divider/>
 
 
-        <Grid container
-              direction="row"
-              justifyContent="space-between"
-              spacing={2}
-              alignItems="stretch">
-          <Grid item xs>
-            <ImageUploader></ImageUploader>
+          <Grid container
+                direction="row"
+                justifyContent="space-between"
+                spacing={2}
+                alignItems="stretch">
+            <Grid item xs>
+              <ImageUploader></ImageUploader>
+            </Grid>
+
+            <Grid item xs>
+              <Box>
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                    <Typography variant="h4">Linear Transformation</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails><LinearTransformationForm/></AccordionDetails>
+                </Accordion>
+
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                    <Typography variant="h4">Histogram Equalization</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails><HistogramForm/></AccordionDetails>
+                </Accordion>
+
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                    <Typography variant="h4">Power Mapping</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails><PowerForm/></AccordionDetails>
+                </Accordion>
+
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                    <Typography variant="h4">Convolution</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails><ConvolutionForm/></AccordionDetails>
+                </Accordion>
+
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                    <Typography variant="h4">Rotation</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails><RotationForm/></AccordionDetails>
+                </Accordion>
+
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                    <Typography variant="h4">Filtering</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails><FilteringForm/></AccordionDetails>
+                </Accordion>
+
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                    <Typography variant="h4">Shear</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails><ShearForm/></AccordionDetails>
+                </Accordion>
+
+
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                    <Typography variant="h4">Scale</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails><ScaleForm/></AccordionDetails>
+                </Accordion>
+
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                    <Typography variant="h4">Flip</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails><FlipForm/></AccordionDetails>
+                </Accordion>
+
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                    <Typography variant="h4">Edge Detection</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails><EdgeForm/></AccordionDetails>
+                </Accordion>
+
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                    <Typography variant="h4">GPT-4</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails><GPT4/></AccordionDetails>
+                </Accordion>
+
+
+              </Box>
+            </Grid>
+
+            <Grid item xs={12}>
+              <LiveView/>
+            </Grid>
+
+
           </Grid>
 
-          <Grid item xs>
-            <Box>
-              <Accordion>
-                <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                  <Typography variant="h4">Linear Transformation</Typography>
-                </AccordionSummary>
-                <AccordionDetails><LinearTransformationForm/></AccordionDetails>
-              </Accordion>
 
-              <Accordion>
-                <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                  <Typography variant="h4">Histogram Equalization</Typography>
-                </AccordionSummary>
-                <AccordionDetails><HistogramForm/></AccordionDetails>
-              </Accordion>
-
-              <Accordion>
-                <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                  <Typography variant="h4">Power Mapping</Typography>
-                </AccordionSummary>
-                <AccordionDetails><PowerForm/></AccordionDetails>
-              </Accordion>
-
-              <Accordion>
-                <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                  <Typography variant="h4">Convolution</Typography>
-                </AccordionSummary>
-                <AccordionDetails><ConvolutionForm/></AccordionDetails>
-              </Accordion>
-
-              <Accordion>
-                <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                  <Typography variant="h4">Rotation</Typography>
-                </AccordionSummary>
-                <AccordionDetails><RotationForm/></AccordionDetails>
-              </Accordion>
-
-              <Accordion>
-                <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                  <Typography variant="h4">Filtering</Typography>
-                </AccordionSummary>
-                <AccordionDetails><FilteringForm/></AccordionDetails>
-              </Accordion>
-
-              <Accordion>
-                <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                  <Typography variant="h4">Shear</Typography>
-                </AccordionSummary>
-                <AccordionDetails><ShearForm/></AccordionDetails>
-              </Accordion>
-
-
-              <Accordion>
-                <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                  <Typography variant="h4">Scale</Typography>
-                </AccordionSummary>
-                <AccordionDetails><ScaleForm/></AccordionDetails>
-              </Accordion>
-
-              <Accordion>
-                <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                  <Typography variant="h4">Flip</Typography>
-                </AccordionSummary>
-                <AccordionDetails><FlipForm/></AccordionDetails>
-              </Accordion>
-
-              <Accordion>
-                <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                  <Typography variant="h4">Edge Detection</Typography>
-                </AccordionSummary>
-                <AccordionDetails><EdgeForm/></AccordionDetails>
-              </Accordion>
-
-              <Accordion>
-                <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                  <Typography variant="h4">GPT-4</Typography>
-                </AccordionSummary>
-                <AccordionDetails><GPT4/></AccordionDetails>
-              </Accordion>
-
-
-            </Box>
-          </Grid>
-
-          <Grid item xs={12}>
-            <LiveView/>
-          </Grid>
-
-
-        </Grid>
-
-
-      </Provider>
-    </Container>
-    {/*</Paper>*/}
+        </Provider>
+      </Container>
+    </Paper>
   </ThemeProvider>
 }

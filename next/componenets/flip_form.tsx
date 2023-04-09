@@ -1,7 +1,19 @@
 import {Button, Card, CardActions, CardContent, FormControl, Grid, TextField} from "@mui/material";
 import {ChangeEvent, useState} from "react";
+import {useAppDispatch} from "@/store";
 
 export default function FlipForm() {
+  const dispatch = useAppDispatch();
+
+  const flipAlongX = () => {
+    dispatch({type: "app/addFlipOperation", payload: {axis: "x"}});
+  }
+
+  const flipAlongY = () => {
+    dispatch({type: "app/addFlipOperation", payload: {axis: "y"}});
+  }
+
+
   return <Card>
     <CardActions>
       <Grid container
@@ -10,11 +22,11 @@ export default function FlipForm() {
             justifyContent="space-between"
             alignItems="stretch">
         <Grid item xs>
-          <Button fullWidth variant="outlined">Flip Along Horizontal Axis</Button>
+          <Button fullWidth variant="outlined" onClick={flipAlongX}>Flip Along X Axis</Button>
         </Grid>
 
         <Grid item xs>
-          <Button fullWidth variant="outlined">Flip Along Vertical Axis</Button>
+          <Button fullWidth variant="outlined" onClick={flipAlongY}>Flip Along Y Axis</Button>
         </Grid>
       </Grid>
     </CardActions>
