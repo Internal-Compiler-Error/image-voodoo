@@ -1,9 +1,7 @@
 #![allow(unused)]
 
 use crate::canvas_image::CanvasImage;
-use crate::interpolation::{
-    bi_nearest_neighbour_interpolation, bilinear_interpolation, nearest_neighbour_interpolation,
-};
+use crate::interpolation::{bi_nearest_neighbour_interpolation, bilinear_interpolation, lerp, nearest_neighbour_interpolation};
 use itertools::iproduct;
 use std::collections::HashSet;
 use std::fmt::format;
@@ -18,56 +16,46 @@ pub enum Interpolation {
 
 
 pub fn scale_bilinear(image: &CanvasImage, new_width: u32, new_height: u32) -> CanvasImage {
-    let width_scale_factor = (new_width - 1) / (image.horizontal_size() - 1);
-    let height_scale_factor = (new_height - 1) / (image.vertical_size() - 1);
-
     let pos = iproduct!(0..new_height, 0..new_width);
+    let width = image.width() as f64;
+    let height = image.height() as f64;
 
     // transform the positions into a stream of rbga values we can directly copy into our buffer
     // we don't care if the x y actually have a direct mapping, this implementation of bilinear
     // interpolation will handle that for us
     let rgba = pos.flat_map(|(y, x)| {
-        let xf = x as f64;
-        let yf = y as f64;
-        let width_scale_factor_f = width_scale_factor as f64;
-        let height_scale_factor_f = height_scale_factor as f64;
+        let x_ratio = x as f64 / (new_width as f64 - 1.);
+        let y_ratio = y as f64 / (new_height as f64 - 1.);
 
-        let (x0, x1) = {
-            let x0 = (xf / width_scale_factor_f).floor() as u32;
-            let x1 = (xf / width_scale_factor_f).ceil() as u32;
-            (x0, x1)
-        };
 
-        let (y0, y1) = {
-            let y0 = (yf / height_scale_factor_f).floor() as u32;
-            let y1 = (yf / height_scale_factor_f).ceil() as u32;
-            (y0, y1)
-        };
+        let src_x = (x_ratio * width).min(width - 1.);
+        let src_y = (y_ratio * height).min(height - 1.);
 
-        let xx = xf / width_scale_factor_f;
-        let yy = yf / height_scale_factor_f;
-        let nearest_r = bilinear_interpolation(xx, yy, x0, y0, x1, y1, &|x, y| {
-            image
-                .r(x, y)
-                .expect(&*format!("{x} {y} should be within bounds"))
-        });
-        let nearest_g = bilinear_interpolation(xx, yy, x0, y0, x1, y1, &|x, y| {
-            image
-                .g(x, y)
-                .expect(&*format!("{x} {y} should be within bounds"))
-        });
-        let nearest_b = bilinear_interpolation(xx, yy, x0, y0, x1, y1, &|x, y| {
-            image
-                .b(x, y)
-                .expect(&*format!("{x} {y} should be within bounds"))
-        });
-        let nearest_a = bilinear_interpolation(xx, yy, x0, y0, x1, y1, &|x, y| {
-            image
-                .a(x, y)
-                .expect(&*format!("{x} {y} should be within bounds"))
-        });
 
-        [nearest_r, nearest_g, nearest_b, nearest_a]
+        let x_diff = src_x - src_x.floor();
+        let y_diff = src_y - src_y.floor();
+
+        let top_left = image.rgba(src_x.floor() as u32, src_y.floor() as u32).unwrap();
+        let top_right = image.rgba(src_y.ceil() as u32, src_y.floor() as u32).unwrap();
+        let bottom_left = image.rgba(src_x.floor() as u32, src_y.ceil() as u32).unwrap();
+        let bottom_right = image.rgba(src_x.ceil() as u32, src_y.ceil() as u32).unwrap();
+
+        let top = lerp(
+            top_left.1 as f64,
+            top_right.1 as f64,
+            x_diff,
+        );
+
+        let bottom = lerp(
+            bottom_left.1 as f64,
+            bottom_right.1 as f64,
+            x_diff,
+        );
+
+        let middle = lerp(top, bottom, y_diff);
+
+        let r = middle.clamp(0., 255.) as u8;
+        [0, r, 0, 255]
     });
 
     // then we can just copy our transformed stream into a buffer and create a new image from it
@@ -144,7 +132,7 @@ mod tests {
 
 
     #[test]
-    fn sanity() {
+    fn scale_test() {
         // read the picture from file
         let image = image::open("meme.png").unwrap();
 

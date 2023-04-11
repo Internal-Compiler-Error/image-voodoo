@@ -32,9 +32,10 @@ impl BiInterpolation for BiLinearInterpolation {
 }
 
 pub struct BiNearestNeighbourInterpolation;
+
 impl BiInterpolation for BiNearestNeighbourInterpolation {
     fn interpolate(&self, x: f64, y: f64, x0: u32, y0: u32, x1: u32, y1: u32, f: &dyn Fn(u32, u32) -> u8) -> u8 {
-       bi_nearest_neighbour_interpolation(x, y, x0, y0, x1, y1, f)
+        bi_nearest_neighbour_interpolation(x, y, x0, y0, x1, y1, f)
     }
 }
 
@@ -122,6 +123,12 @@ pub(crate) fn bi_nearest_neighbour_interpolation(
     // interpolate between f0 and f1
     nearest_neighbour_interpolation(x, x0, x1, f0, f1)
 }
+
+pub fn lerp(x0: f64, x1: f64, t: f64) -> f64 {
+    let ti = 1. - t;
+    x0 * ti + x1 * t
+}
+
 
 #[cfg(test)]
 mod tests {
