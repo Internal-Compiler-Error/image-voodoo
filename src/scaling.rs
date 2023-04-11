@@ -16,20 +16,6 @@ pub enum Interpolation {
     Bilinear,
 }
 
-pub(crate) fn city_block_distance(x1: u32, y1: u32, x2: u32, y2: u32) -> f64 {
-    (x1 as f64 - x2 as f64).abs() + (y1 as f64 - y2 as f64).abs()
-}
-
-pub(crate) fn chebyshev_distance(x1: u32, y1: u32, x2: u32, y2: u32) -> f64 {
-    (x1 as f64 - x2 as f64)
-        .abs()
-        .max((y1 as f64 - y2 as f64).abs())
-}
-
-pub(crate) fn euclidean_distance(x1: u32, y1: u32, x2: u32, y2: u32) -> f64 {
-    ((x1 as f64 - x2 as f64).powf(2f64) + (y1 as f64 - y2 as f64).powf(2f64)).sqrt()
-}
-
 
 pub fn scale_bilinear(image: &CanvasImage, new_width: u32, new_height: u32) -> CanvasImage {
     let width_scale_factor = (new_width - 1) / (image.horizontal_size() - 1);
@@ -108,6 +94,7 @@ mod tests {
     use super::*;
     use num_traits::abs;
     use std::sync::Once;
+    use image::{ImageBuffer, Rgba};
 
     static INIT: Once = Once::new();
 
@@ -153,5 +140,31 @@ mod tests {
         }
 
         Ok(())
+    }
+
+
+    #[test]
+    fn sanity() {
+        // read the picture from file
+        let image = image::open("meme.png").unwrap();
+
+        // convert to RGBA
+        let image = image.into_rgba8();
+
+        // convert to CanvasImage
+        let width = image.width();
+        let height = image.height();
+        let mut canvas_image = CanvasImage::from_vec_with_size(image.into_raw(), width, height);
+
+        let scaled = scale_bilinear(&canvas_image, width * 2, height * 2);
+
+        // convert to back to image and save
+        let image: ImageBuffer<Rgba<u8>, &[u8]> = ImageBuffer::from_raw(
+            scaled.horizontal_size(),
+            scaled.vertical_size(),
+            scaled.rgba_slice().clone(),
+        )
+            .unwrap();
+        image.save("meme_scaled.png").unwrap();
     }
 }

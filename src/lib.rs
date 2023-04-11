@@ -11,8 +11,9 @@ pub mod scaling;
 pub mod single_pixel_transformation;
 pub mod utils;
 pub mod flip;
-mod image_index;
-mod distance;
+pub mod image_index;
+pub mod distance;
+pub mod color_space;
 
 const INIT: Once = Once::new();
 

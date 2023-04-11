@@ -160,6 +160,27 @@ impl CanvasImage {
 
         CanvasImage::from_vec_with_size(image, self.width, self.height)
     }
+
+    pub fn convert_to_greyscale(&mut self) {
+        self
+            .rgba_iter_mut()
+            .for_each(|(r, g, b, _)| {
+                let mut linear_r = *r as f64;
+                let mut linear_g = *g as f64;
+                let mut linear_b = *b as f64;
+
+                linear_r = linear_r.linearize();
+                linear_g = linear_g.linearize();
+                linear_b = linear_b.linearize();
+
+                let mut lumma = to_luminance(linear_r, linear_g, linear_b);
+                lumma = to_srgb(lumma);
+
+                *r = lumma.clamp(u8::MIN as f64, u8::MAX as f64) as u8;
+                *g = lumma.clamp(u8::MIN as f64, u8::MAX as f64) as u8;
+                *b = lumma.clamp(u8::MIN as f64, u8::MAX as f64) as u8;
+            });
+    }
 }
 
 impl CircularIndexedImage for CanvasImage {
@@ -273,3 +294,4 @@ mod filters;
 
 pub use filters::*;
 pub use edge_detection::*;
+use crate::color_space::{Linearize, to_luminance, to_srgb};
