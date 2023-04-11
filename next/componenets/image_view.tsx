@@ -8,8 +8,8 @@ export default function ImageView(props: { image: ImageData | undefined, }) {
 
   useEffect(() => {
     const canvas = document.getElementById("image_view_canvas") as HTMLCanvasElement;
-    canvas.width = screen.width / 2;
-    canvas.height = screen.height / 2;
+    canvas.width = screen.width / 3;
+    canvas.height = screen.height / 3;
   }, []);
 
 

@@ -22,41 +22,6 @@ impl Into<ImageData> for CanvasImage {
 }
 
 impl CanvasImage {
-    /// Returns a new image that is flipped horizontally. In other words, the image is mirrored along
-    /// the vertical axis.
-    pub fn flip_horizontal(&self) -> ImageData {
-        let mut data = Vec::new();
-
-        for y in 0..self.height {
-            for x in (0..self.width).rev() {
-                data.push(self.r(x, y).unwrap());
-                data.push(self.g(x, y).unwrap());
-                data.push(self.b(x, y).unwrap());
-                data.push(self.a(x, y).unwrap());
-            }
-        }
-
-        ImageData::new_with_u8_clamped_array_and_sh(Clamped(&data), self.width, self.height).unwrap()
-    }
-
-    /// Returns a new image that is flipped vertically. In other words, the image is mirrored along
-    /// the horizontal axis.
-    pub fn flip_vertical(&self) -> ImageData {
-        let mut data = Vec::new();
-
-        for y in (0..self.height).rev() {
-            for x in 0..self.width {
-                data.push(self.r(x, y).unwrap());
-                data.push(self.g(x, y).unwrap());
-                data.push(self.b(x, y).unwrap());
-                data.push(self.a(x, y).unwrap());
-            }
-        }
-
-        ImageData::new_with_u8_clamped_array_and_sh(Clamped(&data), self.width, self.height).unwrap()
-    }
-
-
     /**************************** random junk **************************************/
 
     pub fn new(image_data: ImageData) -> CanvasImage {
@@ -79,11 +44,29 @@ impl CanvasImage {
         &self.data
     }
 
+    /// Returns the *geometric* width of the image
+    ///
+    /// With a pixel of 1 x 1, the geometric width is 0. Since points in the geometric space are
+    /// have no sizes.
     pub fn width(&self) -> u32 {
+        self.width - 1
+    }
+
+    /// Returns the *geometric* height of the image
+    ///
+    /// With a pixel of 1 x 1, the geometric height is 0. Since points in the geometric space are
+    /// have no sizes.
+    pub fn height(&self) -> u32 {
+        self.height - 1
+    }
+
+    /// Returns the number of pixels in the horizontal direction
+    pub fn horizontal_size(&self) -> u32 {
         self.width
     }
 
-    pub fn height(&self) -> u32 {
+    /// Returns the number of pixels in the vertical direction
+    pub fn vertical_size(&self) -> u32 {
         self.height
     }
 
@@ -315,26 +298,4 @@ mod test {
         assert_eq!(g(100, 100), 0);
         assert_eq!(g(-1, -1), 0);
     }
-
-    //
-    // #[test]
-    // fn test_reflective_indexed() {
-    //     // only defined from -3 to 3 for both x and y
-    //     let f = |x: i32, y: i32| {
-    //         if -3 <= x && x < 4 && -3 <= y && y < 4 {
-    //             Some((x.abs() * y.abs()) as u8)
-    //         } else {
-    //             None
-    //         }
-    //     };
-    //
-    //     // yes the period is indeed 7, since 0 is part of -3 to 3
-    //     let g = reflective_indexed(&f, 7, 7);
-    //
-    //     assert_eq!(g(0, 0), 0);
-    //     assert_eq!(g(3, 3), 9);
-    //
-    //     assert_eq!(g(3, 4), 3 * 3);
-    //     assert_eq!(g(-5, -4), 2 * 3);
-    // }
 }

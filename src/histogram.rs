@@ -96,8 +96,8 @@ mod tests {
 
         // convert to back to image and save
         let image: ImageBuffer<Rgba<u8>, &[u8]> = ImageBuffer::from_raw(
-            equalized.width(),
-            equalized.height(),
+            equalized.horizontal_size(),
+            equalized.vertical_size(),
             equalized.rgba_slice().clone(),
         )
             .unwrap();

@@ -293,8 +293,8 @@ mod tests {
 
         // convert to back to image and save
         let image: ImageBuffer<Rgba<u8>, &[u8]> = ImageBuffer::from_raw(
-            edge_map.width(),
-            edge_map.height(),
+            edge_map.horizontal_size(),
+            edge_map.vertical_size(),
             edge_map.rgba_slice().clone(),
         )
             .unwrap();
@@ -318,8 +318,8 @@ mod tests {
 
         // convert to back to image and save
         let image: ImageBuffer<Rgba<u8>, &[u8]> = ImageBuffer::from_raw(
-            edge_map.width(),
-            edge_map.height(),
+            edge_map.horizontal_size(),
+            edge_map.vertical_size(),
             edge_map.rgba_slice().clone(),
         )
             .unwrap();

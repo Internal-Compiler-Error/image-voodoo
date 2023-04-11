@@ -32,8 +32,8 @@ pub(crate) fn euclidean_distance(x1: u32, y1: u32, x2: u32, y2: u32) -> f64 {
 
 
 pub fn scale_bilinear(image: &CanvasImage, new_width: u32, new_height: u32) -> CanvasImage {
-    let width_scale_factor = (new_width - 1) / (image.width() - 1);
-    let height_scale_factor = (new_height - 1) / (image.height() - 1);
+    let width_scale_factor = (new_width - 1) / (image.horizontal_size() - 1);
+    let height_scale_factor = (new_height - 1) / (image.vertical_size() - 1);
 
     let pos = iproduct!(0..new_height, 0..new_width);
 
@@ -94,8 +94,8 @@ pub fn scale_bilinear(image: &CanvasImage, new_width: u32, new_height: u32) -> C
 pub fn scale_via_bilinear(image: ImageData, width_factor: u32, height_factor: u32) -> ImageData {
     let image = CanvasImage::new(image);
 
-    let new_width = image.width() * width_factor;
-    let new_height = image.height() * height_factor;
+    let new_width = image.horizontal_size() * width_factor;
+    let new_height = image.vertical_size() * height_factor;
 
 
     let scaled = scale_bilinear(&image, new_width, new_height);

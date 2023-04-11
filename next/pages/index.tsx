@@ -39,16 +39,16 @@ const LiveView = connect((state: State) => {
 const primaryGreen = green[500];
 const accentGreen = green.A200;
 const darkGreen = green[900];
-const primaryPurple = purple[500];
-const accentPurple = purple.A200;
-const darkPurple = purple[900];
+const primaryPink = pink[500];
+const accentPink = pink.A200;
+const darkPink = pink[900];
 
 const darkTheme = createTheme({
   palette: {
     primary: {
-      light: accentPurple,
-      main: primaryPurple,
-      dark: darkPurple,
+      light: accentPink,
+      main: primaryPink,
+      dark: darkPink,
       contrastText: "#fff"
     },
     mode: "dark",
@@ -63,7 +63,16 @@ const darkTheme = createTheme({
 
 export default function Home() {
   return <ThemeProvider theme={darkTheme}>
-    <Paper variant="outlined">
+    <Paper
+        variant="outlined"
+           style={{
+             position: "fixed",
+             top: 0,
+             left: 0,
+             bottom: 0,
+             right: 0,
+             overflow: "auto"
+    }}>
       <Container>
         <Provider store={store}>
           <Typography variant="h1" align="center">Image Voodoo</Typography>
@@ -158,12 +167,12 @@ export default function Home() {
                   <AccordionDetails><EdgeForm/></AccordionDetails>
                 </Accordion>
 
-                <Accordion>
-                  <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                    <Typography variant="h4">GPT-4</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails><GPT4/></AccordionDetails>
-                </Accordion>
+                {/*<Accordion>*/}
+                {/*  <AccordionSummary expandIcon={<ExpandMoreIcon/>}>*/}
+                {/*    <Typography variant="h4">GPT-4</Typography>*/}
+                {/*  </AccordionSummary>*/}
+                {/*  <AccordionDetails><GPT4/></AccordionDetails>*/}
+                {/*</Accordion>*/}
 
 
               </Box>

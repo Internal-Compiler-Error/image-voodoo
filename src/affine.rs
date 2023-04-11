@@ -35,13 +35,13 @@ fn rotate_point(point: (f64, f64), radian: f64) -> (f64, f64) {
 /// Rotate the image by radian, enlarge the image to fit the rotated image, empty spaces are filled
 /// using bilinear interpolation.
 pub fn rotate_rad(image: &CanvasImage, radian: f64) -> CanvasImage {
-    let width = image.width() as f64;
-    let height = image.height() as f64;
+    let width = image.horizontal_size() as f64;
+    let height = image.vertical_size() as f64;
 
     let (new_width, new_height) = width_height_after_rotation(radian, width, height);
 
     // image center before rotation
-    let (cx, cy) = (image.width() as f64 / 2f64, image.height() as f64 / 2f64);
+    let (cx, cy) = (image.horizontal_size() as f64 / 2f64, image.vertical_size() as f64 / 2f64);
 
     // offset from the center after rotation
     let (ox, oy) = (
@@ -61,7 +61,7 @@ pub fn rotate_rad(image: &CanvasImage, radian: f64) -> CanvasImage {
         let x = (new_x + cx).round() as i32;
         let y = (new_y + cy).round() as i32;
 
-        let pixel = if x >= 0 && x < image.width() as i32 && y >= 0 && y < image.height() as i32 {
+        let pixel = if x >= 0 && x < image.horizontal_size() as i32 && y >= 0 && y < image.vertical_size() as i32 {
             image.rgba(x as u32, y as u32).unwrap_or((255, 0, 0, 0))
         } else {
             (255, 0, 0, 0)
@@ -148,8 +148,8 @@ fn get_operation_matrix(width: usize, height: usize, transformation: &Matrix2<f6
 
 
 fn rotate_via_matrix(image: &CanvasImage, radian: f64) -> CanvasImage {
-    let width = image.width() as f64;
-    let height = image.height() as f64;
+    let width = image.horizontal_size() as f64;
+    let height = image.vertical_size() as f64;
 
     let (new_width, new_height) = width_height_after_rotation_matrix(radian, width, height);
 
@@ -157,8 +157,8 @@ fn rotate_via_matrix(image: &CanvasImage, radian: f64) -> CanvasImage {
         radian.cos(), -radian.sin(),
         radian.sin(), radian.cos(),
     );
-    let transform = get_operation_matrix(image.width() as usize,
-                                         image.height() as usize,
+    let transform = get_operation_matrix(image.horizontal_size() as usize,
+                                         image.vertical_size() as usize,
                                          &rotate);
 
 
@@ -172,7 +172,7 @@ fn rotate_via_matrix(image: &CanvasImage, radian: f64) -> CanvasImage {
             let x = v.x.round() as i32;
             let y = v.y.round() as i32;
 
-            if x >= 0 && x < image.width() as i32 && y >= 0 && y < image.height() as i32 {
+            if x >= 0 && x < image.horizontal_size() as i32 && y >= 0 && y < image.vertical_size() as i32 {
                 image.rgba(x as u32, y as u32)
                     .map_or(TRANSPARENT, |(r, g, b, a)| [r, g, b, a])
             } else {
@@ -188,8 +188,8 @@ fn rotate_via_matrix(image: &CanvasImage, radian: f64) -> CanvasImage {
 /// [1 + lambda * miu, lambda,
 ///  miu             , 1]
 fn shear(image: &CanvasImage, lambda: f64, miu: f64) -> CanvasImage {
-    let width = image.width() as f64;
-    let height = image.height() as f64;
+    let width = image.horizontal_size() as f64;
+    let height = image.vertical_size() as f64;
 
     let shear = Matrix2::new(
         1.0 + lambda * miu, lambda,
@@ -198,8 +198,8 @@ fn shear(image: &CanvasImage, lambda: f64, miu: f64) -> CanvasImage {
 
     let (new_width, new_height) = new_size_after_transformation(width, height, &shear);
 
-    let transform = get_operation_matrix(image.width() as usize,
-                                         image.height() as usize,
+    let transform = get_operation_matrix(image.horizontal_size() as usize,
+                                         image.vertical_size() as usize,
                                          &shear);
 
     let rgba = iproduct!(0..new_height, 0..new_width)
@@ -212,7 +212,7 @@ fn shear(image: &CanvasImage, lambda: f64, miu: f64) -> CanvasImage {
             let x = v.x.round() as i32;
             let y = v.y.round() as i32;
 
-            if x >= 0 && x < image.width() as i32 && y >= 0 && y < image.height() as i32 {
+            if x >= 0 && x < image.horizontal_size() as i32 && y >= 0 && y < image.vertical_size() as i32 {
                 image.rgba(x as u32, y as u32)
                     .map_or(TRANSPARENT, |(r, g, b, a)| [r, g, b, a])
             } else {
@@ -298,8 +298,8 @@ mod tests {
 
         // convert to back to image and save
         let image: ImageBuffer<Rgba<u8>, &[u8]> = ImageBuffer::from_raw(
-            rotated.width(),
-            rotated.height(),
+            rotated.horizontal_size(),
+            rotated.vertical_size(),
             rotated.rgba_slice().clone(),
         )
             .unwrap();
@@ -325,8 +325,8 @@ mod tests {
 
         // convert to back to image and save
         let image: ImageBuffer<Rgba<u8>, &[u8]> = ImageBuffer::from_raw(
-            rotated.width(),
-            rotated.height(),
+            rotated.horizontal_size(),
+            rotated.vertical_size(),
             rotated.rgba_slice().clone(),
         )
             .unwrap();
@@ -351,8 +351,8 @@ mod tests {
 
         // convert to back to image and save
         let image: ImageBuffer<Rgba<u8>, &[u8]> = ImageBuffer::from_raw(
-            sheared.width(),
-            sheared.height(),
+            sheared.horizontal_size(),
+            sheared.vertical_size(),
             sheared.rgba_slice().clone(),
         )
             .unwrap();

@@ -18,7 +18,7 @@ pub fn linear_transformation(image: ImageData, gain: f64, bias: f64) -> ImageDat
             [r, g, b, a]
         });
     let buffer = Vec::from_iter(transformed);
-    ImageData::new_with_u8_clamped_array_and_sh(Clamped(&buffer), image.width(), image.height()).unwrap()
+    ImageData::new_with_u8_clamped_array_and_sh(Clamped(&buffer), image.horizontal_size(), image.vertical_size()).unwrap()
 }
 
 #[wasm_bindgen]
@@ -36,5 +36,5 @@ pub fn gamma_transformation(image: ImageData, gamma: f64) -> ImageData {
         });
     let buffer = Vec::from_iter(rgba);
 
-    ImageData::new_with_u8_clamped_array_and_sh(Clamped(&buffer), image.width(), image.height()).unwrap()
+    ImageData::new_with_u8_clamped_array_and_sh(Clamped(&buffer), image.horizontal_size(), image.vertical_size()).unwrap()
 }

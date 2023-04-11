@@ -48,7 +48,7 @@ pub fn convolve(image: ImageData, kernel: &Kernel, border_strategy: BorderStrate
         });
 
     let mut buffer = Vec::from_iter(rgba);
-    ImageData::new_with_u8_clamped_array_and_sh(Clamped(&mut buffer), image.width(), image.height()).unwrap()
+    ImageData::new_with_u8_clamped_array_and_sh(Clamped(&mut buffer), image.horizontal_size(), image.vertical_size()).unwrap()
 }
 
 
@@ -81,9 +81,9 @@ impl CanvasImage {
         };
 
 
-        let mut buffer = Vec::with_capacity((self.height() * self.width() * 4) as usize);
-        for y in 0..self.height() as isize {
-            for x in 0..self.width() as isize {
+        let mut buffer = Vec::with_capacity((self.vertical_size() * self.horizontal_size() * 4) as usize);
+        for y in 0..self.vertical_size() as isize {
+            for x in 0..self.horizontal_size() as isize {
                 let mut r_acc = 0f64;
                 let mut g_acc = 0f64;
                 let mut b_acc = 0f64;
@@ -120,15 +120,15 @@ impl CanvasImage {
 
     /// ONLY for greyscale and it zero pads, would usually doesn't make the output look too good
     fn greyscale_convolve_with_fft(&self, kernel: &Kernel) -> Vec<f64> {
-        let new_height = (self.height() as usize + kernel.height - 1).next_power_of_two();
-        let new_width = (self.width() as usize + kernel.width - 1).next_power_of_two();
+        let new_height = (self.vertical_size() as usize + kernel.height - 1).next_power_of_two();
+        let new_width = (self.horizontal_size() as usize + kernel.width - 1).next_power_of_two();
 
         // we only care about the r channel
         let r_access = |x, y| self.r(x, y);
         let mut image_complex: Vec<_> = iproduct!(0..new_height, 0..new_width)
             .map(|(x, y)| {
-                if (0 <= x && x <= self.width() as usize) &&
-                    (0 <= y && y <= self.height() as usize) {
+                if (0 <= x && x <= self.horizontal_size() as usize) &&
+                    (0 <= y && y <= self.vertical_size() as usize) {
                     let real = r_access(x as u32, y as u32).unwrap() as f64;
 
                     Complex::new(real, 0.0)
@@ -170,9 +170,9 @@ impl CanvasImage {
         ifft.process(&mut image_complex);
 
         // convert to greyscale
-        let mut buffer = vec![0f64; (self.height() * self.width() * 4) as usize];
-        for y in 0..self.height() as usize {
-            for x in 0..self.width() as usize {
+        let mut buffer = vec![0f64; (self.vertical_size() * self.horizontal_size() * 4) as usize];
+        for y in 0..self.vertical_size() as usize {
+            for x in 0..self.horizontal_size() as usize {
                 let r = image_complex[x * new_width + y].re;
                 let g = r;
                 let b = r;
