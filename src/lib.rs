@@ -12,6 +12,7 @@ pub mod single_pixel_transformation;
 pub mod utils;
 pub mod flip;
 mod image_index;
+mod distance;
 
 const INIT: Once = Once::new();
 
