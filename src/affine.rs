@@ -106,11 +106,15 @@ pub fn rotate_deg(image: &CanvasImage, degree: f64) -> CanvasImage {
 
 /*********** Matrix Zone ***********/
 
+/// Return the 2x2 transformation matrix mapped to 3x3 matrix using homogeneous coordinates.
+///
+/// # Note
+/// Width and height should be the geometric size of the image, not the number of pixels.
 fn get_operation_matrix(width: usize, height: usize, transformation: &Matrix2<f64>) -> Matrix3<f64> {
     let width = width as f64;
     let height = height as f64;
 
-    let (new_width, new_height) = new_size_after_transformation(width, height, transformation);
+    let (new_width, new_height) = new_size_after_transformation(width + 1., height + 1., transformation);
 
     // offset from the center before rotation
     let (cx, cy) = (
@@ -119,8 +123,8 @@ fn get_operation_matrix(width: usize, height: usize, transformation: &Matrix2<f6
 
     // offset from the center after rotation
     let (ox, oy) = (
-        (new_width as f64 - width) as f64 / 2.0,
-        (new_height as f64 - height) as f64 / 2.0,
+        (new_width as f64 - width - 1.) as f64 / 2.0,
+        (new_height as f64 - height - 1.) as f64 / 2.0,
     );
 
     let to_after = Matrix3::new(
@@ -148,17 +152,17 @@ fn get_operation_matrix(width: usize, height: usize, transformation: &Matrix2<f6
 
 
 fn rotate_via_matrix(image: &CanvasImage, radian: f64) -> CanvasImage {
-    let width = image.horizontal_size() as f64;
-    let height = image.vertical_size() as f64;
+    let h_size = image.horizontal_size() as f64;
+    let v_size = image.vertical_size() as f64;
 
-    let (new_width, new_height) = width_height_after_rotation_matrix(radian, width, height);
+    let (new_width, new_height) = width_height_after_rotation_matrix(radian, h_size, v_size);
 
     let rotate = Matrix2::new(
         radian.cos(), -radian.sin(),
         radian.sin(), radian.cos(),
     );
-    let transform = get_operation_matrix(image.horizontal_size() as usize,
-                                         image.vertical_size() as usize,
+    let transform = get_operation_matrix(image.horizontal_size() as usize - 1,
+                                         image.vertical_size() as usize - 1,
                                          &rotate);
 
 
@@ -188,18 +192,18 @@ fn rotate_via_matrix(image: &CanvasImage, radian: f64) -> CanvasImage {
 /// [1 + lambda * miu, lambda,
 ///  miu             , 1]
 fn shear(image: &CanvasImage, lambda: f64, miu: f64) -> CanvasImage {
-    let width = image.horizontal_size() as f64;
-    let height = image.vertical_size() as f64;
+    let h_size = image.horizontal_size() as f64;
+    let v_size = image.vertical_size() as f64;
 
     let shear = Matrix2::new(
         1.0 + lambda * miu, lambda,
         miu, 1.0,
     );
 
-    let (new_width, new_height) = new_size_after_transformation(width, height, &shear);
+    let (new_width, new_height) = new_size_after_transformation(h_size, v_size, &shear);
 
-    let transform = get_operation_matrix(image.horizontal_size() as usize,
-                                         image.vertical_size() as usize,
+    let transform = get_operation_matrix(image.horizontal_size() as usize - 1,
+                                         image.vertical_size() as usize - 1,
                                          &shear);
 
     let rgba = iproduct!(0..new_height, 0..new_width)
@@ -224,12 +228,20 @@ fn shear(image: &CanvasImage, lambda: f64, miu: f64) -> CanvasImage {
     CanvasImage::from_vec_with_size(buffer, new_width, new_height)
 }
 
-fn new_size_after_transformation(width: f64, height: f64, transformation: &Matrix2<f64>) -> (u32, u32) {
+/// Determine the new size of the image after transformation
+///
+/// # Width and Height
+/// Note they refer to the number of pixels in a given direction, *not* the geometric width and
+/// height
+///
+/// # Return Value
+/// The new horizontal and vertical *pixel count* of the image, not the geometric width and height
+fn new_size_after_transformation(horizontal_size: f64, vertical_size: f64, transformation: &Matrix2<f64>) -> (u32, u32) {
     let corners = [
         Vector2::new(0.0, 0.0),
-        Vector2::new(0.0, height),
-        Vector2::new(width, 0.0),
-        Vector2::new(width, height)];
+        Vector2::new(0.0, vertical_size - 1.),
+        Vector2::new(horizontal_size - 1., 0.0),
+        Vector2::new(horizontal_size - 1., vertical_size - 1.)];
     let transformed_corners = corners
         .iter()
         .map(|v| transformation * v)
@@ -251,13 +263,13 @@ fn new_size_after_transformation(width: f64, height: f64, transformation: &Matri
     (new_width, new_height)
 }
 
-fn width_height_after_rotation_matrix(radian: f64, width: f64, height: f64) -> (u32, u32) {
+fn width_height_after_rotation_matrix(radian: f64, horizontal_size: f64, vertical_size: f64) -> (u32, u32) {
     let rotation_matrix = Matrix2::new(
         radian.cos(), -radian.sin(),
         radian.sin(), radian.cos(),
     );
 
-    new_size_after_transformation(width, height, &rotation_matrix)
+    new_size_after_transformation(horizontal_size, vertical_size, &rotation_matrix)
 }
 
 #[wasm_bindgen]
@@ -282,7 +294,7 @@ mod tests {
     use image::{ImageBuffer, Rgba};
 
     #[test]
-    fn sanity() {
+    fn meme_rotate() {
         // read the picture from file
         let image = image::open("meme.png").unwrap();
 
