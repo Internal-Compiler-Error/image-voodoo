@@ -94,12 +94,12 @@ impl CanvasImage {
                     for j in -((kernel.width as isize) / 2)..=(kernel.width / 2) as isize {
                         let r_intensity = r(&self, (x - i) as i32, (y - j) as i32);
                         let g_intensity = g(&self, (x - i) as i32, (y - j) as i32);
-                        let b_itensity = b(&self, (x - i) as i32, (y - j) as i32);
+                        let b_intensity = b(&self, (x - i) as i32, (y - j) as i32);
                         let a_intensity = a(&self, (x - i) as i32, (y - j) as i32);
 
                         r_acc += kernel[(i, j)] * r_intensity as f64;
                         g_acc += kernel[(i, j)] * g_intensity as f64;
-                        b_acc += kernel[(i, j)] * b_itensity as f64;
+                        b_acc += kernel[(i, j)] * b_intensity as f64;
 
                         // i don't know where in the world would you actually want to mess with
                         // the alpha channel, in a convolution
