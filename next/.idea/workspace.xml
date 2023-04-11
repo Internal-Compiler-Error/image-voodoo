@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="48102704-3dec-41d6-a9b3-6619007def3b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/../src/interpolation.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../src/interpolation.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/scaling.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../src/scaling.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -129,7 +128,7 @@
       <workItem from="1680931482322" duration="58000" />
       <workItem from="1680931576069" duration="27643000" />
       <workItem from="1681052612509" duration="4359000" />
-      <workItem from="1681229450710" duration="3183000" />
+      <workItem from="1681229450710" duration="3889000" />
     </task>
     <servers />
   </component>
