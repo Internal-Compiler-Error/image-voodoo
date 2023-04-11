@@ -118,6 +118,7 @@ impl CanvasImage {
     }
 
 
+    #[allow(dead_code)]
     /// ONLY for greyscale and it zero pads, would usually doesn't make the output look too good
     fn greyscale_convolve_with_fft(&self, kernel: &Kernel) -> Vec<f64> {
         let new_height = (self.vertical_size() as usize + kernel.height - 1).next_power_of_two();
@@ -127,8 +128,8 @@ impl CanvasImage {
         let r_access = |x, y| self.r(x, y);
         let mut image_complex: Vec<_> = iproduct!(0..new_height, 0..new_width)
             .map(|(x, y)| {
-                if (0 <= x && x <= self.horizontal_size() as usize) &&
-                    (0 <= y && y <= self.vertical_size() as usize) {
+                if (x <= self.horizontal_size() as usize) &&
+                    (y <= self.vertical_size() as usize) {
                     let real = r_access(x as u32, y as u32).unwrap() as f64;
 
                     Complex::new(real, 0.0)
@@ -142,8 +143,8 @@ impl CanvasImage {
         let kernel_access = |x, y| kernel.data[y as usize + x as usize * kernel.width];
         let mut kernel_complex: Vec<_> = iproduct!(0..new_height, 0..new_width)
             .map(|(x, y)| {
-                if (0 <= x && x <= kernel.width as usize) &&
-                    (0 <= y && y <= kernel.height as usize) {
+                if (x <= kernel.width as usize) &&
+                    (y <= kernel.height as usize) {
                     let real = kernel_access(x as u32, y as u32);
 
                     Complex::new(real, 0.0)

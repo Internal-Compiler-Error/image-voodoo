@@ -98,8 +98,6 @@ pub fn reflective_indexed<'a, F, U, S, R>(f: &'a F, x_period: U, y_period: U) ->
         U::try_from(abs(x)).unwrap()
     };
 
-    let one = U::one();
-
     move |x, y| {
         let zero = U::zero();
         let x_floored_period = div_floor(unsigned_abs(x), x_period);
@@ -160,5 +158,25 @@ mod tests {
                 println!("g({}, {}) = {}", i, j, g(i, j));
             }
         }
+    }
+
+
+    #[test]
+    fn zero_padded_returns_zero() {
+        // only defined from 0 to 6 for both x and y
+        let f = |x, y| {
+            if 0 <= x && x < 7 && 0 <= y && y < 7 {
+                Some(x as u8 * y as u8)
+            } else {
+                None
+            }
+        };
+
+        let g = zero_padded(&f);
+
+        assert_eq!(g(0, 0), 0);
+        assert_eq!(g(3, 4), 12);
+        assert_eq!(g(100, 100), 0);
+        assert_eq!(g(-1, -1), 0);
     }
 }

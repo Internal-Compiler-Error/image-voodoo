@@ -273,29 +273,3 @@ mod filters;
 
 pub use filters::*;
 pub use edge_detection::*;
-
-#[cfg(test)]
-mod test {
-    use crate::image_index::zero_padded;
-    use super::*;
-
-
-    #[test]
-    fn zero_padded_returns_zero() {
-        // only defined from 0 to 6 for both x and y
-        let f = |x, y| {
-            if 0 <= x && x < 7 && 0 <= y && y < 7 {
-                Some(x as u8 * y as u8)
-            } else {
-                None
-            }
-        };
-
-        let g = zero_padded(&f);
-
-        assert_eq!(g(0, 0), 0);
-        assert_eq!(g(3, 4), 12);
-        assert_eq!(g(100, 100), 0);
-        assert_eq!(g(-1, -1), 0);
-    }
-}
