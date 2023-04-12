@@ -3,13 +3,17 @@ import assert from "assert";
 
 
 export default function ImageView(props: { image: ImageData | undefined, }) {
-  const canvasWidth = 400;
-  const canvasHeight = 400;
-
   useEffect(() => {
     const canvas = document.getElementById("image_view_canvas") as HTMLCanvasElement;
-    canvas.width = screen.width / 3;
-    canvas.height = screen.height / 3;
+
+    // @ts-ignore
+    const width = canvas.parentElement?.clientWidth / 1.05;
+    const height = width;
+
+    if (width && height) {
+      canvas.width = width;
+      canvas.height = height;
+    }
   }, []);
 
 
@@ -23,8 +27,10 @@ export default function ImageView(props: { image: ImageData | undefined, }) {
       // convert image from ImageData to ImageBitmap
       const bitmap = await createImageBitmap(props.image);
       const canvas = document.getElementById("image_view_canvas") as HTMLCanvasElement;
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
 
-      const scale = Math.max(canvasWidth / width, canvasHeight / height);
+      const scale = Math.min(canvasWidth / width, canvasHeight / height);
       console.log({width, height, scale, canvasWidth, canvasHeight})
 
       const ctx = canvas.getContext("2d");

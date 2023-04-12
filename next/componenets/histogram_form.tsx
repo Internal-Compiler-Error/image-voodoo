@@ -4,7 +4,8 @@ import {useAppDispatch} from "@/store";
 export default function HistogramForm() {
   const dispatch = useAppDispatch();
   const onClick = () => {
-    dispatch({type: "app/addEqualizeOperation"})
+    dispatch({type: "app/addEqualizeOperation"});
+    dispatch({type: "app/runPipeline"});
   }
 
   return <Card>

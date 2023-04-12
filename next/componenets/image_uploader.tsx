@@ -33,21 +33,18 @@ export default function ImageUploader() {
     // @ts-ignore
     const file = e.target.files.item(0);
 
-    // console.log(file)
 
     // @ts-ignore
     const imageData = await imageToImageData(file).catch(console.error);
 
-    // console.log(imageData);
-
-    dispatch({type: "app/setImage", payload: imageData})
+    dispatch({type: "app/setInitial", payload: imageData});
   }
 
   const ImageCanvas = connect((state: State) => {
-        const [last] = state.image.slice(-1)
-        return {image: last}
-      }
-  )(ImageView);
+   return {
+      image: state.final
+   }
+  })(ImageView);
 
   return <Card>
     <CardContent>

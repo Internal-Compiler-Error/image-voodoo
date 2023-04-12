@@ -18,6 +18,7 @@ export default function ShearForm() {
 
   const doShear = () => {
     dispatch({type: "app/addShearOperation", payload: {lambda: lambda, miu: miu}});
+    dispatch({type: "app/runPipeline"});
   }
 
 

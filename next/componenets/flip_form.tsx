@@ -7,10 +7,13 @@ export default function FlipForm() {
 
   const flipAlongX = () => {
     dispatch({type: "app/addFlipOperation", payload: {axis: "x"}});
+    dispatch({type: "app/runPipeline"});
   }
 
   const flipAlongY = () => {
     dispatch({type: "app/addFlipOperation", payload: {axis: "y"}});
+    dispatch({type: "app/runPipeline"});
+
   }
 
 

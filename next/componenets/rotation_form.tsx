@@ -23,7 +23,8 @@ export default function RotationForm() {
 
   const onClick = () => {
 
-    dispatch({type: "app/addRotationOperation", payload: {angle: degrees}})
+    dispatch({type: "app/addRotationOperation", payload: {angle: degrees}});
+    dispatch({type: "app/runPipeline"});
   }
 
   const onTextFieldChange = (e: ChangeEvent<HTMLInputElement>) => {

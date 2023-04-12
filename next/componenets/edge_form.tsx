@@ -12,10 +12,13 @@ export default function EdgeForm() {
 
   const doLaplacian = () => {
     dispatch({type: "app/addLaplacianEdgeOperation", payload: {threshold: threshold}});
+    dispatch({type: "app/runPipeline"});
+
   }
 
   const doLaplacianOfGaussian = () => {
     dispatch({type: "app/addLaplacianOfGaussianEdgeOperation", payload: {threshold: threshold}});
+    dispatch({type: "app/runPipeline"});
   }
 
 

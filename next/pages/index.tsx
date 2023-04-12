@@ -65,36 +65,35 @@ export default function Home() {
   return <ThemeProvider theme={darkTheme}>
     <Paper
         variant="outlined"
-           style={{
-             position: "fixed",
-             top: 0,
-             left: 0,
-             bottom: 0,
-             right: 0,
-             overflow: "auto"
-    }}>
-      <Container>
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          bottom: 0,
+          right: 0,
+          overflow: "auto",
+        }}>
+      <Container maxWidth="xl">
         <Provider store={store}>
           <Typography variant="h1" align="center">Image Voodoo</Typography>
 
           <Typography variant="body1">You maybe have heard of ImageMagick, now get ready for Image Voodoo. It does the
-            same
-            {/* eslint-disable-next-line react/no-unescaped-entities */}
-            thing, but it's worse.
+            same thing, but it&apos;s worse.
           </Typography>
           <Divider/>
 
 
-          <Grid container
+          <Grid
+              container
                 direction="row"
                 justifyContent="space-between"
                 spacing={2}
                 alignItems="stretch">
-            <Grid item xs>
+            <Grid item xs={6}>
               <ImageUploader></ImageUploader>
             </Grid>
 
-            <Grid item xs>
+            <Grid item xs={6}>
               <Box>
                 <Accordion>
                   <AccordionSummary expandIcon={<ExpandMoreIcon/>}>

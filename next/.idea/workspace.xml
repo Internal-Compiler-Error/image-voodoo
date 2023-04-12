@@ -5,6 +5,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="48102704-3dec-41d6-a9b3-6619007def3b" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/componenets/convolution_form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/convolution_form.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/componenets/edge_form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/edge_form.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/componenets/filtering_form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/filtering_form.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/componenets/flip_form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/flip_form.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/componenets/histogram_form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/histogram_form.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/componenets/image_uploader.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/image_uploader.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/componenets/image_view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/image_view.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/componenets/linear_transformation_form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/linear_transformation_form.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/componenets/operations_view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/operations_view.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/componenets/power_form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/power_form.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/componenets/rotation_form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/rotation_form.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/componenets/scaling_form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/scaling_form.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/componenets/shear_form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/shear_form.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pages/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/pages/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/store.ts" beforeDir="false" afterPath="$PROJECT_DIR$/store.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/canvas_image/edge_detection.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../src/canvas_image/edge_detection.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/canvas_image/filters.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../src/canvas_image/filters.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/distance.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../src/distance.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../src/interpolation.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../src/interpolation.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -128,7 +147,7 @@
       <workItem from="1680931482322" duration="58000" />
       <workItem from="1680931576069" duration="27643000" />
       <workItem from="1681052612509" duration="4359000" />
-      <workItem from="1681229450710" duration="3889000" />
+      <workItem from="1681229450710" duration="13057000" />
     </task>
     <servers />
   </component>

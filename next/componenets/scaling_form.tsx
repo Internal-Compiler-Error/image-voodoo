@@ -18,6 +18,7 @@ export default function ScaleForm() {
 
   const onClick = () => {
     dispatch({type: "app/addScaleOperation", payload: {width_factor: xScale, height_factor: yScale}});
+    dispatch({type: "app/runPipeline"});
   }
 
 

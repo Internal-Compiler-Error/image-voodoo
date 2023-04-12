@@ -1,12 +1,34 @@
 use itertools::iproduct;
+use wasm_bindgen::prelude::*;
 use super::*;
+
+#[wasm_bindgen]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub enum FilterMode {
+    Min,
+    Max,
+    Median,
+}
 
 
 impl CanvasImage {
-    #[allow(dead_code, unused)]
-    /// For each pixel,
-    pub fn apply_min_filer(&self, distance: u32) -> CanvasImage {
-        // assert!(distance.is_sign_positive(), "Distance must be positive");
+    /// Filters the image using the given filter and distance
+    pub fn filter(&self, filter: FilterMode, distance: u32) -> CanvasImage {
+        // Given an iterator over the pixels within the distance, returns the filtered value
+        let strategy: Box<dyn Fn(&mut dyn Iterator<Item=u8>) -> Option<u8>> = match filter {
+            FilterMode::Min => Box::new(|iter| {
+                iter.min()
+            }),
+            FilterMode::Max => Box::new(|iter| {
+                iter.max()
+            }),
+            FilterMode::Median => Box::new(|iter| {
+                let mut vec: Vec<_> = iter.collect();
+                vec.sort_unstable();
+                vec.get(vec.len() / 2).copied()
+            }),
+        };
+
         let distance = distance as isize;
         let r = |x, y| ReflectiveIndexedImage::g(self, x, y);
         let g = |x, y| ReflectiveIndexedImage::g(self, x, y);
@@ -15,7 +37,6 @@ impl CanvasImage {
 
         let width = self.horizontal_size() as isize;
         let height = self.vertical_size() as isize;
-        let jump = distance as isize;
 
 
         // create the set that contains all x and y offsets that are within the distance
@@ -26,37 +47,47 @@ impl CanvasImage {
                         .map(move |y_offset| (x_offset, y_offset))
                 });
 
-
         let rgba = iproduct!(0..height, 0..width)
             // map each pixel to a set of pixels that are within the distance
             .map(|(y, x)| {
-                let r_min = offsets.clone()
+                let mut r = offsets.clone()
                     .map(|(y_offset, x_offset)| (y + y_offset, x + x_offset))
                     .map(|(y_prime, x_prime)| {
                         r(x_prime as i32, y_prime as i32)
-                    }).min();
+                    });
+                let r = strategy(&mut r);
 
-                let g_min = offsets.clone()
+                let mut g = offsets.clone()
                     .map(|(y_offset, x_offset)| (y + y_offset, x + x_offset))
                     .map(|(y_prime, x_prime)| {
                         g(x_prime as i32, y_prime as i32)
-                    }).min();
+                    });
+                let g = strategy(&mut g);
 
-                let b_min = offsets.clone()
+
+                let mut b = offsets.clone()
                     .map(|(y_offset, x_offset)| (y + y_offset, x + x_offset))
                     .map(|(y_prime, x_prime)| {
                         b(x_prime as i32, y_prime as i32)
-                    }).min();
+                    });
+                let b = strategy(&mut b);
 
                 let a = a(x as i32, y as i32);
 
-                [r_min.unwrap(), g_min.unwrap(), b_min.unwrap(), 255]
+                [r.unwrap(), g.unwrap(), b.unwrap(), a]
             });
 
         let buffer = Vec::from_iter(rgba.flatten());
 
         CanvasImage::from_vec_with_size(buffer, self.horizontal_size(), self.vertical_size())
     }
+}
+
+#[wasm_bindgen]
+pub fn filter(image: ImageData, distance: u32, filter: FilterMode) -> ImageData {
+    let canvas_image = CanvasImage::new(image);
+    let filtered = canvas_image.filter(filter, distance);
+    filtered.into()
 }
 
 #[cfg(test)]
@@ -78,7 +109,7 @@ mod tests {
         let mut canvas_image = CanvasImage::from_vec_with_size(image.into_raw(), width, height);
         canvas_image.convert_to_greyscale();
 
-        let filtered = canvas_image.apply_min_filer(3);
+        let filtered = canvas_image.filter(FilterMode::Min, 3);
 
         // convert to back to image and save
         let image: ImageBuffer<Rgba<u8>, &[u8]> = ImageBuffer::from_raw(

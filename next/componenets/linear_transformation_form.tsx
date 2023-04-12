@@ -30,6 +30,7 @@ export default function LinearTransformationForm() {
     e.preventDefault();
     // dispatch  the params to the IHateRedux
     dispatch({type: "app/addLinearOperation", payload: {gain, bias}});
+    dispatch({type: "app/runPipeline"});
   }
 
 

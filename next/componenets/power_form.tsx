@@ -26,6 +26,7 @@ export default function PowerForm() {
     e.preventDefault();
     // dispatch  the params to the IHateRedux
     dispatch({type: "app/addPowerOperation", payload: {gamma}});
+    dispatch({type: "app/runPipeline"});
   }
 
 
@@ -34,7 +35,14 @@ export default function PowerForm() {
       {/*<Typography variant="h4">Power Mapping</Typography>*/}
       <form onSubmit={onSubmit}>
         <FormControl fullWidth>
-          <TextField label="Gamma" onChange={gammaChange} id="power-mappping-gamma" type="number"/>
+          <TextField label="γ" onChange={gammaChange} id="power-mappping-gamma" type="number"
+                     InputProps={{
+                       inputProps: {
+                         min: 0,
+                         step: 0.005,
+                       }
+                     }
+                     }/>
         </FormControl>
 
         <CardActions>

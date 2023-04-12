@@ -4,7 +4,12 @@ import {
   Operation,
   RotationOperation,
   ConvolutionOperation,
-  FlipOperation, useAppDispatch
+  FlipOperation,
+  useAppDispatch,
+  ShearOpration,
+  ScaleOperation,
+  EqualizeOperation,
+  MinFilterOperation, MedianFilterOperation, MaxFilterOperation,
 } from "@/store";
 import {Box, Button, Card, CardActions, CardContent, Grid, Typography} from "@mui/material";
 import assert from "assert";
@@ -15,7 +20,7 @@ function PowerOperationCard(props: { operation: PowerOperation }) {
   return <Card variant="outlined">
     <CardContent>
       <Typography variant="h5">Power</Typography>
-      <Typography variant="h6">Gamma: {props.operation.gamma}</Typography>
+      <Typography variant="h6">γ: {props.operation.gamma}</Typography>
     </CardContent>
   </Card>
 }
@@ -54,6 +59,76 @@ function ConvolutionOperationCard(props: { operation: ConvolutionOperation }) {
   </Card>
 }
 
+function EqualizeOperationCard(props: { operation: EqualizeOperation }) {
+  // assert(props.operation.variant === "Equalize")
+
+  return <Card variant="outlined">
+    <CardContent>
+      <Typography variant="h5">Equalize</Typography>
+    </CardContent>
+  </Card>
+}
+
+function MinFilterOperationCard(props: { operation: MinFilterOperation }) {
+  // assert(props.operation.variant === "MinFilter")
+
+  return <Card variant="outlined">
+    <CardContent>
+      <Typography variant="h5">Min Filter</Typography>
+      <Typography variant="h6">distance: {props.operation.distance}</Typography>
+    </CardContent>
+  </Card>
+}
+
+function MaxFilterOperationCard(props: { operation: MaxFilterOperation }) {
+  // assert(props.operation.variant === "MaxFilter")
+
+  return <Card variant="outlined">
+    <CardContent>
+      <Typography variant="h5">Max Filter</Typography>
+      <Typography variant="h6">distance: {props.operation.distance}</Typography>
+    </CardContent>
+  </Card>
+}
+
+
+function MedianFilterOperationCard(props: { operation: MedianFilterOperation }) {
+  // assert(props.operation.variant === "MedianFilter")
+
+  return <Card variant="outlined">
+    <CardContent>
+      <Typography variant="h5">Median Filter</Typography>
+      <Typography variant="h6">distance: {props.operation.distance}</Typography>
+    </CardContent>
+  </Card>
+}
+
+function ShearOperationCard(props: { operation: ShearOpration }) {
+  // assert(props.operation.variant === "Shear")
+
+  return <Card variant="outlined">
+    <CardContent>
+      <Typography variant="h5">Shear</Typography>
+      <Typography variant="h6">λ: {props.operation.lambda}</Typography>
+      <Typography variant="h6">μ: {props.operation.miu}</Typography>
+    </CardContent>
+  </Card>
+}
+
+function ScaleOperationCard(props: { operation: ScaleOperation }) {
+  // assert(props.operation.variant === "Scale")
+
+  return <Card variant="outlined">
+    <CardContent>
+      <Typography variant="h5">Scale</Typography>
+      <Typography variant="h6">Width Factor: {props.operation.width_factor}</Typography>
+      <Typography variant="h6">Height Factor: {props.operation.height_factor}
+      </Typography>
+    </CardContent>
+  </Card>
+}
+
+
 function OperationCard(props: { operation: Operation }) {
   switch (props.operation.variant) {
     case "Power":
@@ -66,6 +141,20 @@ function OperationCard(props: { operation: Operation }) {
       return <ConvolutionOperationCard operation={props.operation}/>
     case "Flip":
       return <FlipOperationCard operation={props.operation}/>
+    case "Shear":
+      return <ShearOperationCard operation={props.operation}/>
+    case "Scale":
+      return <ScaleOperationCard operation={props.operation}/>
+    case "Equalize":
+      return <EqualizeOperationCard operation={props.operation}/>
+    case "MinFilter":
+      return <MinFilterOperationCard operation={props.operation}/>
+    case "MaxFilter":
+      return <MaxFilterOperationCard operation={props.operation}/>
+    case "MedianFilter":
+      return <MedianFilterOperationCard operation={props.operation}/>
+    default:
+      return <Box>Unknown Operation</Box>
   }
 }
 
@@ -85,6 +174,7 @@ export default function OperationsView(props: { operations: Operation[] }) {
   const dispatch = useAppDispatch();
   const popLast = () => {
     dispatch({type: "app/removeOperation"});
+    dispatch({type: "app/runPipeline"});
   }
 
 

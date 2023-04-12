@@ -52,7 +52,6 @@ impl Iterator for EightNeighbourIterator {
             return None;
         }
 
-
         // get the next neighbour
         let next = self.current;
         let (cur_x, cur_y) = (self.x, self.y);

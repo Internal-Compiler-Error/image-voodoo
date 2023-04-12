@@ -51,6 +51,7 @@ export default function ConvolutionForm() {
   const handleButtonClick = () => {
     console.log({grid, rowNum, colNum});
     dispatch({type: "app/addConvolutionOperation", payload: {kernel: grid, width: rowNum, height: colNum}});
+    dispatch({type: "app/runPipeline"});
   };
 
   return (
