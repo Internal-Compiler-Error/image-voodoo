@@ -6,7 +6,7 @@ use web_sys::ImageData;
 
 #[wasm_bindgen]
 pub fn linear_transformation(image: ImageData, gain: f64, bias: f64) -> ImageData {
-    let image = CanvasImage::new(image);
+    let image = CanvasImage::from_image_data(image);
 
     let transformed = image.rgba_iter()
         .flat_map(|(r, g, b, a)| {
@@ -23,7 +23,7 @@ pub fn linear_transformation(image: ImageData, gain: f64, bias: f64) -> ImageDat
 
 #[wasm_bindgen]
 pub fn gamma_transformation(image: ImageData, gamma: f64) -> ImageData {
-    let image = CanvasImage::new(image);
+    let image = CanvasImage::from_image_data(image);
 
     let rgba = image.rgba_iter()
         .flat_map(|(r, g, b, a)| {

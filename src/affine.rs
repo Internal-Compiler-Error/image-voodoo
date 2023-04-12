@@ -274,7 +274,7 @@ fn width_height_after_rotation_matrix(radian: f64, horizontal_size: f64, vertica
 
 #[wasm_bindgen]
 pub fn rotate(image: ImageData, degree: f64) -> ImageData {
-    let canvas_image = CanvasImage::new(image);
+    let canvas_image = CanvasImage::from_image_data(image);
 
     let rotated = rotate_deg(&canvas_image, degree);
     rotated.into()
@@ -282,7 +282,7 @@ pub fn rotate(image: ImageData, degree: f64) -> ImageData {
 
 #[wasm_bindgen]
 pub fn shear_wasm(image: ImageData, lambda: f64, miu: f64) -> ImageData {
-    let canvas_image = CanvasImage::new(image);
+    let canvas_image = CanvasImage::from_image_data(image);
 
     let sheared = shear(&canvas_image, lambda, miu);
     sheared.into()

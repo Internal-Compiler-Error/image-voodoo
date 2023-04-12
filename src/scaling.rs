@@ -85,7 +85,7 @@ pub fn scale_bilinear(image: &CanvasImage, new_width: u32, new_height: u32) -> C
 
 #[wasm_bindgen]
 pub fn scale_via_bilinear(image: ImageData, width_factor: u32, height_factor: u32) -> ImageData {
-    let image = CanvasImage::new(image);
+    let image = CanvasImage::from_image_data(image);
 
     let new_width = image.horizontal_size() * width_factor;
     let new_height = image.vertical_size() * height_factor;

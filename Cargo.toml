@@ -3,6 +3,11 @@ name = "image-voodoo"
 version = "0.1.0"
 authors = ["Liang Wang <liang.wang.ice@gmail.com>"]
 edition = "2021"
+description = "WASM image processing library"
+repository = "https://github.com/Internal-Compiler-Error/image-voodoo"
+
+# not because I dislike free software, but rather stupid school rules.
+license = "proprietary"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -12,6 +17,8 @@ default = ["console_error_panic_hook"]
 
 [dependencies]
 wasm-bindgen = "0.2.63"
+
+
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires

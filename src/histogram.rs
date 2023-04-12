@@ -108,7 +108,7 @@ mod tests {
 
 #[wasm_bindgen]
 pub fn equalize(image: ImageData) -> ImageData {
-    let image = CanvasImage::new(image);
+    let image = CanvasImage::from_image_data(image);
 
     let equalized = image.equalize();
 

@@ -24,7 +24,7 @@ fn r_access_work_as_expected() {
 
 
     let image = ImageData::new_with_u8_clamped_array_and_sh(Clamped(&image), 1, 3).unwrap();
-    let image = CanvasImage::new(image);
+    let image = CanvasImage::from_image_data(image);
 
     assert_eq!(image.r(0, 0), Some(0));
     assert_eq!(image.r(1, 0), Some(3));
@@ -43,7 +43,7 @@ fn g_access_work_as_expected() {
 
 
     let image = ImageData::new_with_u8_clamped_array_and_sh(Clamped(&image), 1, 3).unwrap();
-    let image = CanvasImage::new(image);
+    let image = CanvasImage::from_image_data(image);
 
     assert_eq!(image.g(0, 0), Some(1));
     assert_eq!(image.g(1, 0), Some(4));
@@ -62,7 +62,7 @@ fn b_access_work_as_expected() {
 
 
     let image = ImageData::new_with_u8_clamped_array_and_sh(Clamped(&image), 1, 3).unwrap();
-    let image = CanvasImage::new(&image);
+    let image = CanvasImage::from_image_data(&image);
 
     assert_eq!(image.b(0, 0), Some(2));
     assert_eq!(image.b(1, 0), Some(5));

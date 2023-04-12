@@ -255,14 +255,14 @@ impl CanvasImage {
 
 #[wasm_bindgen]
 pub fn laplacian_edge(image: ImageData, threshold: f64) -> ImageData {
-    let image = CanvasImage::new(image);
+    let image = CanvasImage::from_image_data(image);
     let edge_map = image.laplacian_edge(threshold);
     edge_map.into()
 }
 
 #[wasm_bindgen]
 pub fn laplacian_of_gaussian_edge(image: ImageData, threshold: f64) -> ImageData {
-    let image = CanvasImage::new(image);
+    let image = CanvasImage::from_image_data(image);
     let edge_map = image.laplacian_of_gaussian_edge(threshold);
     edge_map.into()
 }

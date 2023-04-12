@@ -1,6 +1,8 @@
+use wasm_bindgen::prelude::*;
 use wasm_bindgen::Clamped;
 use web_sys::ImageData;
 use crate::histogram::Histogram;
+
 
 pub struct CanvasImage {
     data: Vec<u8>,
@@ -21,10 +23,16 @@ impl Into<ImageData> for CanvasImage {
     }
 }
 
+impl From<ImageData> for CanvasImage {
+    fn from(image_data: ImageData) -> Self {
+        CanvasImage::from_image_data(image_data)
+    }
+}
+
 impl CanvasImage {
     /**************************** random junk **************************************/
 
-    pub fn new(image_data: ImageData) -> CanvasImage {
+    pub fn from_image_data(image_data: ImageData) -> CanvasImage {
         CanvasImage {
             data: image_data.data().0,
             width: image_data.width(),
@@ -124,6 +132,7 @@ impl CanvasImage {
         Histogram::from_channel_iterator(&mut a_channel)
     }
 
+    /// Equalize the distribution of intensities in the image, each channel except for alpha is treated independently
     pub fn equalize(&self) -> CanvasImage {
         let mut image = self.data.clone();
 
@@ -161,6 +170,9 @@ impl CanvasImage {
         CanvasImage::from_vec_with_size(image, self.width, self.height)
     }
 
+    /// convert an color image to a greyscale image using the luminance method from
+    /// sRGB -> Linear RGB -> Luminance -> sRGB
+    /// alpha is left untouched
     pub fn convert_to_greyscale(&mut self) {
         self
             .rgba_iter_mut()
@@ -291,7 +303,16 @@ impl ReflectiveIndexedImage for CanvasImage {
 
 mod edge_detection;
 mod filters;
+mod crop;
 
 pub use filters::*;
 pub use edge_detection::*;
 use crate::color_space::{Linearize, to_luminance, to_srgb};
+
+
+#[wasm_bindgen]
+pub fn greyscale(image: ImageData) -> ImageData {
+    let mut canvas_image = CanvasImage::from_image_data(image);
+    canvas_image.convert_to_greyscale();
+    canvas_image.into()
+}

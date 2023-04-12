@@ -30,7 +30,7 @@ pub enum BorderStrategy {
 pub fn convolve(image: ImageData, kernel: &Kernel, border_strategy: BorderStrategy) -> ImageData {
     utils::set_panic_hook();
 
-    let image = CanvasImage::new(image);
+    let image = CanvasImage::from_image_data(image);
 
     let convolved = image.convolve(kernel, border_strategy);
 

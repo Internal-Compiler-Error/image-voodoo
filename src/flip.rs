@@ -8,7 +8,7 @@ use crate::canvas_image::CanvasImage;
 /// Flips the image horizontally, along the x-axis.
 #[wasm_bindgen]
 pub fn flip_along_x_axis(image: ImageData) -> ImageData {
-    let image = CanvasImage::new(image);
+    let image = CanvasImage::from_image_data(image);
 
     // flip along the x-axis
     let rgba = iproduct!(0..image.vertical_size(), 0..image.horizontal_size())
@@ -34,7 +34,7 @@ pub fn flip_along_x_axis(image: ImageData) -> ImageData {
 /// Flips the image horizontally, along the x-axis.
 #[wasm_bindgen]
 pub fn flip_along_y_axis(image: ImageData) -> ImageData {
-    let image = CanvasImage::new(image);
+    let image = CanvasImage::from_image_data(image);
 
     // flip along the x-axis
     let rgba = iproduct!(0..image.vertical_size(), 0..image.horizontal_size())

@@ -85,7 +85,7 @@ impl CanvasImage {
 
 #[wasm_bindgen]
 pub fn filter(image: ImageData, distance: u32, filter: FilterMode) -> ImageData {
-    let canvas_image = CanvasImage::new(image);
+    let canvas_image = CanvasImage::from_image_data(image);
     let filtered = canvas_image.filter(filter, distance);
     filtered.into()
 }
