@@ -21,6 +21,16 @@ export default function EdgeForm() {
     dispatch({type: "app/runPipeline"});
   }
 
+  const doPrewitt = () => {
+    dispatch({type: "app/addPrewittEdgeOperation", payload: {threshold: threshold}});
+    dispatch({type: "app/runPipeline"});
+  }
+
+  const doSobel = () => {
+    dispatch({type: "app/addSobelEdgeOperation", payload: {threshold: threshold}});
+    dispatch({type: "app/runPipeline"});
+  }
+
 
   const bigButtons = {
     width: "100%",
@@ -52,11 +62,11 @@ export default function EdgeForm() {
 
 
         <Grid item xs>
-          <Button variant="outlined" style={bigButtons}>Add Prewitt To Pipeline</Button>
+          <Button variant="outlined" style={bigButtons} onClick={doPrewitt}>Add Prewitt To Pipeline</Button>
         </Grid>
 
         <Grid item xs>
-          <Button variant="outlined" style={bigButtons}>Add Sobel To Pipeline</Button>
+          <Button variant="outlined" style={bigButtons} onClick={doSobel}>Add Sobel To Pipeline</Button>
         </Grid>
 
         <Grid item xs>

@@ -1,18 +1,21 @@
 import {useEffect} from "react";
 import assert from "assert";
+import {useAppDispatch} from "@/store";
+import {blobToPNG} from "@/componenets/image_uploader";
 
 
 export default function ImageView(props: { image: ImageData | undefined, }) {
+  const dispatch = useAppDispatch();
+
+  // set the canvas size to the size of roughly 95% of the parent
   useEffect(() => {
     const canvas = document.getElementById("image_view_canvas") as HTMLCanvasElement;
-
     // @ts-ignore
     const width = canvas.parentElement?.clientWidth / 1.05;
-    const height = width;
 
-    if (width && height) {
+    if (width) {
       canvas.width = width;
-      canvas.height = height;
+      canvas.height = width;
     }
   }, []);
 
@@ -31,7 +34,7 @@ export default function ImageView(props: { image: ImageData | undefined, }) {
       const canvasHeight = canvas.height;
 
       const scale = Math.min(canvasWidth / width, canvasHeight / height);
-      console.log({width, height, scale, canvasWidth, canvasHeight})
+      // console.log({width, height, scale, canvasWidth, canvasHeight})
 
       const ctx = canvas.getContext("2d");
       assert(ctx !== null);
@@ -40,14 +43,19 @@ export default function ImageView(props: { image: ImageData | undefined, }) {
     }
 
 
+    // draw the image if it exists, otherwise display a meme
     if (props.image !== undefined) {
       draw().catch(console.error);
     } else {
-      // nothing to draw noop
+      // yes this hack is very disgusting
+      fetch("https://i.imgur.com/6URJZ4i.png")
+          .then(response => response.blob())
+          .then(blob => blobToPNG(blob))
+          .then((blob) => {
+            dispatch({type: "app/setInitial", payload: blob})
+          })
     }
-
-
-  }, [props.image])
+  }, [dispatch, props.image])
 
   return <div>
     <canvas id="image_view_canvas"

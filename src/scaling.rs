@@ -91,14 +91,17 @@ pub fn scale_bilinear(image: &CanvasImage, new_width: u32, new_height: u32) -> C
     // interpolation will handle that for us
     let rgba = iproduct!(0..new_height, 0..new_width)
         .flat_map(|(y, x)| {
+            // -1 because the geometric width/length is always 1 less the actual number of pixels
+            // don't need to do that for the width and height because I already account for that
             let x_ratio = x as f64 / (new_width as f64 - 1.);
             let y_ratio = y as f64 / (new_height as f64 - 1.);
 
+            // where in theory the pixel would be in the old image, offset of -1 is needed sense we
+            // might ceil and get an out of bounds error
+            let src_x = (x_ratio * width).min(width - 1.);
+            let src_y = (y_ratio * height).min(height - 1.);
 
-            let src_x = (x_ratio * width).min(width);
-            let src_y = (y_ratio * height).min(height);
-
-
+            // to normalize between [0, 1]
             let x_diff = (src_x - src_x.floor()) / src_x;
             let y_diff = (src_y - src_y.floor()) / src_y;
 
@@ -116,15 +119,62 @@ pub fn scale_bilinear(image: &CanvasImage, new_width: u32, new_height: u32) -> C
     CanvasImage::from_vec_with_size(buffer, new_width, new_height)
 }
 
+pub fn scale_nearest(image: &CanvasImage, new_width: u32, new_height: u32) -> CanvasImage {
+    let width = image.width() as f64;
+    let height = image.height() as f64;
+
+    // transform the positions into a stream of rbga values we can directly copy into our buffer
+    // we don't care if the x y actually have a direct mapping, this implementation of bilinear
+    // interpolation will handle that for us
+    let rgba = iproduct!(0..new_height, 0..new_width)
+        .flat_map(|(y, x)| {
+            // -1 because the geometric width/length is always 1 less the actual number of pixels
+            // don't need to do that for the width and height because I already account for that
+            let x_ratio = x as f64 / (new_width as f64 - 1.);
+            let y_ratio = y as f64 / (new_height as f64 - 1.);
+
+            // where in theory the pixel would be in the old image
+            let src_x = (x_ratio * width).min(width - 1.);
+            let src_y = (y_ratio * height).min(height - 1.);
+
+            // to normalize between [0, 1]
+            let x_diff = (src_x - src_x.floor()) / src_x;
+            let y_diff = (src_y - src_y.floor()) / src_y;
+
+            let top_left = image.rgba(src_x.floor() as u32, src_y.floor() as u32).unwrap();
+            let top_right = image.rgba(src_y.ceil() as u32, src_y.floor() as u32).unwrap();
+            let bottom_left = image.rgba(src_x.floor() as u32, src_y.ceil() as u32).unwrap();
+            let bottom_right = image.rgba(src_x.ceil() as u32, src_y.ceil() as u32).unwrap();
+
+            bi_nearest_neighbor_interpolation(&top_left, &top_right, &bottom_left, &bottom_right, x_diff, y_diff)
+        });
+
+    // then we can just copy our transformed stream into a buffer and create a new image from it
+    let buffer = Vec::from_iter(rgba);
+
+    CanvasImage::from_vec_with_size(buffer, new_width, new_height)
+}
+
 #[wasm_bindgen]
-pub fn scale_via_bilinear(image: ImageData, width_factor: u32, height_factor: u32) -> ImageData {
+pub fn scale_via_bilinear(image: ImageData, width_factor: f64, height_factor: f64) -> ImageData {
     let image = CanvasImage::from_image_data(image);
 
-    let new_width = image.horizontal_size() * width_factor;
-    let new_height = image.vertical_size() * height_factor;
+    let new_width = image.horizontal_size() as f64 * width_factor;
+    let new_height = image.vertical_size() as f64 * height_factor;
 
 
-    let scaled = scale_bilinear(&image, new_width, new_height);
+    let scaled = scale_bilinear(&image, new_width as u32, new_height as u32);
+    scaled.into()
+}
+
+#[wasm_bindgen]
+pub fn scale_via_nearest_neighbor(image: ImageData, width_factor: f64, height_factor: f64) -> ImageData {
+    let image = CanvasImage::from_image_data(image);
+
+    let new_width = image.horizontal_size() as f64 * width_factor;
+    let new_height = image.vertical_size() as f64 * height_factor;
+
+    let scaled = scale_nearest(&image, new_width as u32, new_height as u32);
     scaled.into()
 }
 

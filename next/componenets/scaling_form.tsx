@@ -16,7 +16,7 @@ export default function ScaleForm() {
     setYScale(parseFloat(e.target.value));
   }
 
-  const onClick = () => {
+  const doBiLinear = () => {
     dispatch({type: "app/addScaleOperation", payload: {width_factor: xScale, height_factor: yScale}});
     dispatch({type: "app/runPipeline"});
   }
@@ -35,7 +35,7 @@ export default function ScaleForm() {
                 value={xScale}
                 onChange={onXScaleChange}
                 InputProps={
-                  {inputProps: {min: 1}}
+                  {inputProps: {min: 1, step: 0.01}}
                 }
             />
           </FormControl>
@@ -49,7 +49,7 @@ export default function ScaleForm() {
                 value={yScale}
                 onChange={onYScaleChange}
                 InputProps={
-                  {inputProps: {min: 1}}
+                  {inputProps: {min: 1, step: 0.01}}
                 }
             />
           </FormControl>
@@ -59,11 +59,11 @@ export default function ScaleForm() {
     <CardActions>
       <Grid container spacing={2}>
         <Grid item xs>
-          <Button fullWidth variant="outlined" onClick={onClick}>Scale via Bi-linear</Button>
+          <Button fullWidth variant="outlined" onClick={doBiLinear}>Scale via Bi-linear</Button>
         </Grid>
 
         <Grid item xs>
-          <Button fullWidth variant="outlined" onClick={onClick}>Scale via Nearest Neighbor</Button>
+          <Button fullWidth variant="outlined" onClick={doBiLinear}>Scale via Nearest Neighbor</Button>
         </Grid>
       </Grid>
     </CardActions>

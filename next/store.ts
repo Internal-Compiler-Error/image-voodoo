@@ -2,12 +2,17 @@ import {configureStore, createSlice, PayloadAction} from '@reduxjs/toolkit'
 import {useDispatch} from "react-redux";
 
 import {
+  add_pepper,
+  add_salt,
   convolve,
+  crop_bottom,
+  crop_right,
   equalize,
   filter,
   flip_along_x_axis,
   flip_along_y_axis,
   gamma_transformation,
+  greyscale,
   init,
   Kernel,
   laplacian_edge,
@@ -16,14 +21,19 @@ import {
   rotate,
   scale_via_bilinear,
   shear_wasm,
-  greyscale,
-  crop_right,
-  crop_bottom,
-  add_salt,
-  add_pepper,
+  sobel_edge,
+  prewitt_edge,
+  scale_via_nearest_neighbor,
 } from "wasm-image-voodoo";
+import assert from "assert";
 
 init();
+
+export type ScaleNearestNeighborOperation = {
+  variant: "ScaleNearestNeighbor";
+  width_factor: number;
+  height_factor: number;
+}
 
 export type LinearOperation = {
   variant: "Linear";
@@ -76,6 +86,16 @@ export type LaplacianEdgeOperation = {
 
 export type LaplacianOfGaussianEdgeOperation = {
   variant: "LaplacianOfGaussianEdge";
+  threshold: number;
+}
+
+export type PrewittEdgeOperation = {
+  variant: "PrewittEdge";
+  threshold: number;
+}
+
+export type SobelEdgeOperation = {
+  variant: "SobelEdge";
   threshold: number;
 }
 
@@ -132,11 +152,14 @@ export type Operation =
     | MaxFilterOperation
     | MedianFilterOperation
     | LaplacianOfGaussianEdgeOperation
+    | PrewittEdgeOperation
+    | SobelEdgeOperation
     | GreyScaleOperation
     | CropRightOperation
     | CropBottomOperation
     | AddSaltOperation
-    | AddPepperOperation;
+    | AddPepperOperation
+    | ScaleNearestNeighborOperation;
 
 
 function evaluatePipeline(image: ImageData, operations: Operation[]) {
@@ -180,10 +203,28 @@ function evaluatePipeline(image: ImageData, operations: Operation[]) {
         return crop_right(image, operation.removal);
       case "CropBottom":
         return crop_bottom(image, operation.removal);
-      case "AddSalt":
-        return add_salt(image, operation.probability);
-      case "AddPepper":
-        return add_pepper(image, operation.probability);
+      case "PrewittEdge":
+        return prewitt_edge(image, operation.threshold);
+      case "SobelEdge":
+        return sobel_edge(image, operation.threshold);
+        case "ScaleNearestNeighbor":
+        return scale_via_nearest_neighbor(image, operation.width_factor, operation.height_factor);
+      case "AddSalt": {
+        try {
+          return add_salt(image, operation.probability);
+        } catch (e) {
+          console.error(e);
+          return image;
+        }
+      }
+      case "AddPepper": {
+        try {
+          return add_pepper(image, operation.probability);
+        } catch (e) {
+          console.error(e);
+          return image;
+        }
+      }
     }
   }, image);
 }
@@ -266,6 +307,15 @@ const appSlice = createSlice({
     },
     addAddPepperOperation: (state, action: PayloadAction<Omit<AddPepperOperation, "variant">>) => {
       state.operations.push({variant: "AddPepper", ...action.payload});
+    },
+    addSobelEdgeOperation: (state, action: PayloadAction<Omit<SobelEdgeOperation, "variant">>) => {
+      state.operations.push({variant: "SobelEdge", ...action.payload});
+    },
+    addPrewittEdgeOperation: (state, action: PayloadAction<Omit<PrewittEdgeOperation, "variant">>) => {
+      state.operations.push({variant: "PrewittEdge", ...action.payload});
+    },
+    addScaleNearestNeighborOperation: (state, action: PayloadAction<Omit<ScaleNearestNeighborOperation, "variant">>) => {
+      state.operations.push({variant: "ScaleNearestNeighbor", ...action.payload});
     },
     runPipeline: (state) => {
       if (state.operations.length === 0 || !state.initial) {

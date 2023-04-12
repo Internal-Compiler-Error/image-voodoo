@@ -7,21 +7,22 @@ import {connect} from "react-redux";
 import ImageView from "@/componenets/image_view";
 import UploadIcon from '@mui/icons-material/Upload';
 
+
+export const blobToPNG = (file: any): Promise<ImageData> => {
+  return new Promise((resolve, reject) => {
+    // @ts-ignore
+    get(file, (err, image) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(image);
+      }
+    });
+  });
+};
+
 export default function ImageUploader() {
   const dispatch = useAppDispatch();
-
-  const blobToPNG = (file: File): Promise<ImageData> => {
-    return new Promise((resolve, reject) => {
-      // @ts-ignore
-      get(file, (err, image) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(image);
-        }
-      });
-    });
-  };
 
   // turn the file into an image
   const imageToImageData = async (file: File) => {
@@ -29,33 +30,37 @@ export default function ImageUploader() {
   }
 
 
-  const onChange = async (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const onSetFile = async (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+
+    // @ts-ignore
+    if (!e.target.files) {
+      return;
+    }
+
     // @ts-ignore
     const file = e.target.files.item(0);
-
-
-    // @ts-ignore
     const imageData = await imageToImageData(file).catch(console.error);
-
     dispatch({type: "app/setInitial", payload: imageData});
   }
 
   const ImageCanvas = connect((state: State) => {
-   return {
+    return {
       image: state.final
-   }
+    }
   })(ImageView);
 
   return <Card>
     <CardContent>
-      <Typography variant="h4">Image Uploader (PNG only)</Typography>
+      {/*<Typography variant="h4">Image Uploader</Typography>*/}
+    </CardContent>
 
+    <CardActions>
       <form>
         <FormControl>
           <input
               autoComplete="off"
               type="file" id="image-uploader"
-              onChange={onChange}
+              onChange={onSetFile}
               accept={"image/png"}
               hidden
           />
@@ -63,19 +68,14 @@ export default function ImageUploader() {
             <Button
                 startIcon={<UploadIcon/>}
                 variant="outlined" component="span">
-              Upload File
+              Upload File (PNG only)
             </Button>
           </label>
 
         </FormControl>
       </form>
-    </CardContent>
+    </CardActions>
 
     <ImageCanvas/>
-
-
-    {/*<CardActions>*/}
-    {/*  <Button variant="outlined">Upload!</Button>*/}
-    {/*</CardActions>*/}
   </Card>
 }

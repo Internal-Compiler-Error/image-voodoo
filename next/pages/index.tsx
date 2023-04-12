@@ -29,6 +29,7 @@ import ScaleForm from "@/componenets/scaling_form";
 import FlipForm from "@/componenets/flip_form";
 import Misc from "@/componenets/misc";
 import Crop from "@/componenets/crop";
+import Image from "next/image";
 
 
 const LiveView = connect((state: State) => {
@@ -65,6 +66,8 @@ const darkTheme = createTheme({
 
 export default function Home() {
   return <ThemeProvider theme={darkTheme}>
+    <img id="img-meme" src="https://s3.fission.codes/2022/10/rust_poster.png" hidden alt=""></img>
+
     <Paper
         variant="outlined"
         style={{
@@ -79,7 +82,7 @@ export default function Home() {
         <Provider store={store}>
           <Typography variant="h1" align="center">Image Voodoo</Typography>
 
-          <Typography variant="body1">You maybe have heard of ImageMagick, now get ready for Image Voodoo. It does the
+          <Typography variant="h6">You maybe have heard of ImageMagick, now get ready for Image Voodoo. It does the
             same thing, but it&apos;s worse.
           </Typography>
           <Divider/>
@@ -182,14 +185,6 @@ export default function Home() {
                   </AccordionSummary>
                   <AccordionDetails><EdgeForm/></AccordionDetails>
                 </Accordion>
-
-                {/*<Accordion>*/}
-                {/*  <AccordionSummary expandIcon={<ExpandMoreIcon/>}>*/}
-                {/*    <Typography variant="h4">GPT-4</Typography>*/}
-                {/*  </AccordionSummary>*/}
-                {/*  <AccordionDetails><GPT4/></AccordionDetails>*/}
-                {/*</Accordion>*/}
-
 
               </Box>
             </Grid>

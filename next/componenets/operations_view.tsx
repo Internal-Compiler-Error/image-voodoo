@@ -14,7 +14,12 @@ import {
   MaxFilterOperation,
   GreyScaleOperation,
   CropRightOperation,
-  CropBottomOperation, AddSaltOperation, AddPepperOperation,
+  CropBottomOperation,
+  AddSaltOperation,
+  AddPepperOperation,
+  SobelEdgeOperation,
+  PrewittEdgeOperation,
+  LaplacianEdgeOperation, LaplacianOfGaussianEdgeOperation, ScaleNearestNeighborOperation,
 } from "@/store";
 import {Box, Button, Card, CardActions, CardContent, Grid, Paper, Typography} from "@mui/material";
 import assert from "assert";
@@ -48,7 +53,7 @@ function RotationOperationCard(props: { operation: RotationOperation }) {
   </Card>
 }
 
-function AddSaltOperationCard (props: { operation: AddSaltOperation }) {
+function AddSaltOperationCard(props: { operation: AddSaltOperation }) {
   return <Card variant="outlined">
     <CardContent>
       <Typography variant="h5">Add Salt</Typography>
@@ -70,8 +75,7 @@ function ConvolutionOperationCard(props: { operation: ConvolutionOperation }) {
   const {kernel, width} = props.operation;
 
 
-
-  const Item = styled(Paper)(({ theme }) => ({
+  const Item = styled(Paper)(({theme}) => ({
     padding: theme.spacing(2),
     textAlign: 'center',
     color: theme.palette.text.secondary,
@@ -190,6 +194,57 @@ function FlipOperationCard(props: { operation: FlipOperation }) {
   </Card>
 }
 
+function SobelEdgeOperationCard(props: { operation: SobelEdgeOperation }) {
+  return <Card variant="outlined">
+    <CardContent>
+      <Typography variant="h5">Sobel Edge</Typography>
+      <Typography variant="h6">threshold: {props.operation.threshold}</Typography>
+    </CardContent>
+  </Card>
+}
+
+function PrewittEdgeOperationCard(props: { operation: PrewittEdgeOperation }) {
+  return <Card variant="outlined">
+    <CardContent>
+      <Typography variant="h5">Prewitt Edge</Typography>
+      <Typography variant="h6">threshold: {props.operation.threshold}
+      </Typography>
+    </CardContent>
+  </Card>
+}
+
+function LaplacianEdgeOperationCard(props: { operation: LaplacianEdgeOperation }) {
+  return <Card variant="outlined">
+    <CardContent>
+      <Typography variant="h5">Laplacian Edge</Typography>
+      <Typography variant="h6">threshold: {props.operation.threshold}
+      </Typography>
+    </CardContent>
+  </Card>
+}
+
+function LaplacianOfGaussianEdgeOperationCard(props: { operation: LaplacianOfGaussianEdgeOperation }) {
+  return <Card variant="outlined">
+    <CardContent>
+      <Typography variant="h5">Laplacian of Gaussian</Typography>
+      <Typography variant="h6">threshold: {props.operation.threshold}
+      </Typography>
+    </CardContent>
+  </Card>
+}
+
+
+function ScaleNearestNeighborOperationCard(props: { operation: ScaleNearestNeighborOperation }) {
+  return <Card variant="outlined">
+    <CardContent>
+      <Typography variant="h5">Scale Nearest</Typography>
+      <Typography variant="h6">Width Factor: {props.operation.width_factor}
+      </Typography>
+      <Typography variant="h6">Height Factor: {props.operation.height_factor}
+      </Typography>
+    </CardContent>
+  </Card>
+}
 
 function OperationCard(props: { operation: Operation }) {
   switch (props.operation.variant) {
@@ -225,6 +280,16 @@ function OperationCard(props: { operation: Operation }) {
       return <AddSaltOperationCard operation={props.operation}/>
     case "AddPepper":
       return <AddPepperOperationCard operation={props.operation}/>
+    case "PrewittEdge":
+      return <PrewittEdgeOperationCard operation={props.operation}/>
+    case "SobelEdge":
+      return <SobelEdgeOperationCard operation={props.operation}/>
+    case "LaplacianEdge":
+      return <LaplacianEdgeOperationCard operation={props.operation}/>
+    case "LaplacianOfGaussianEdge":
+      return <LaplacianOfGaussianEdgeOperationCard operation={props.operation}/>
+    case "ScaleNearestNeighbor":
+      return <ScaleNearestNeighborOperationCard operation={props.operation}/>
     default:
       return <Card><CardContent>Unknown Operation</CardContent></Card>
   }
