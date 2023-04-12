@@ -1,15 +1,12 @@
 use crate::canvas_image::CanvasImage;
 use enum_iterator::Sequence;
-use itertools::iproduct;
+use itertools::{iproduct, izip};
 use num_traits::{abs_sub};
 use crate::convolution::{BorderStrategy, Kernel};
 use crate::image_index::reflective_indexed;
 use wasm_bindgen::prelude::*;
 use web_sys::ImageData;
 use rand::distributions::{Distribution, Bernoulli};
-
-const WHITE: [u8; 4] = [255, 255, 255, 255];
-const BLACK: [u8; 4] = [0, 0, 0, 255];
 
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Sequence)]
@@ -92,7 +89,6 @@ impl Iterator for EightNeighbourIterator {
 
 
 impl CanvasImage {
-    #[allow(dead_code)]
     /// ONLY for greyscale
     /// Assuming the image has already gone through the Laplacian matrix, now we just need to find
     /// all the points where the value is close to 0.
@@ -101,51 +97,65 @@ impl CanvasImage {
     ///                  `abs(value) > threshold`
     /// # Returns
     ///  a new image where the edges are white and the rest is black
-    fn greyscale_laplacian_edges(image: &Vec<f64>,
+    fn greyscale_laplacian_edges(convolved_image: &Vec<f64>,
                                  width: u32,
                                  height: u32,
                                  threshold: f64) -> CanvasImage {
 
-        // access the r channel of the image, we assume the image is greyscale so all the channels
-        // are the same except for the alpha channel
-        let r_access = |x, y| {
+        // access the entire rgba pixel of the convolution image
+        let pixel_access = |x, y| {
             let x = x as usize;
             let y = y as usize;
             let width = width as usize;
             let index = y * width + x;
 
-            let intensity = image
+            let rgba = convolved_image
                 .as_slice()
                 .chunks_exact(4)
                 .nth(index)
-                .unwrap()[0];
+                .unwrap();
 
-            Some(intensity)
+
+            Some([rgba[0], rgba[1], rgba[2], rgba[3]])
         };
 
-        let r_reflect = reflective_indexed::<_, _, i64, _>(&r_access, width, height);
+        let pixel_reflect = reflective_indexed::<_, _, i64, _>(&pixel_access, width, height);
 
         let rgba = iproduct!(0..height, 0..width)
             .map(|(y, x)| {
-                // todo: x and y can go out of bounds of i32
                 let neighbours = EightNeighbourIterator::new(x.try_into().unwrap(), y.try_into().unwrap());
 
                 neighbours
                     .map(|((x, y), (ops_x, ops_y))| {
-                        let p = r_reflect(x as i64, y as i64);
-                        let q = r_reflect(ops_x as i64, ops_y as i64);
+                        let [r, g, b, a] = pixel_reflect(x as i64, y as i64);
+                        let [r_ops, g_ops, b_ops, a_ops] = pixel_reflect(ops_x as i64, ops_y as i64);
 
-                        p.signum() != q.signum() && abs_sub(p, q) > threshold
+                        // test to see if each channel is an edge
+                        [
+                            r.signum() != r_ops.signum() && abs_sub(r, r_ops) > threshold,
+                            g.signum() != g_ops.signum() && abs_sub(g, g_ops) > threshold,
+                            b.signum() != b_ops.signum() && abs_sub(b, b_ops) > threshold,
+                            a.signum() != a_ops.signum() && abs_sub(a, a_ops) > threshold,
+                        ]
                     })
-                    .reduce(|a, b| a || b)
+                    // we consider a pixel is an edge as long as one or more direction crosses zero
+                    .reduce(|[r1, g1, b1, a1], [r2, g2, b2, a2]| {
+                        [
+                            r1 || r2,
+                            g1 || g2,
+                            b1 || b2,
+                            a1 || a2,
+                        ]
+                    }).unwrap()
             })
-            .flat_map(|potential_edges|
-                if potential_edges.unwrap() {
-                    WHITE
-                } else {
-                    BLACK
-                }
-            );
+            .flat_map(|[r, g, b, _a]| {
+                [
+                    if r { 255 } else { 0 },
+                    if g { 255 } else { 0 },
+                    if b { 255 } else { 0 },
+                    255
+                ]
+            });
 
         let buffer = Vec::from_iter(rgba);
 
@@ -153,30 +163,41 @@ impl CanvasImage {
     }
 
 
-    #[allow(dead_code)]
-    /// ONLY for greyscale
-    fn greyscale_gradient(
+    /// Assuming the image has already gone through a type of gradient kernel, with x direction in `del_x` and y
+    /// direction in `del_y`, now just mark the edge by if the magnitude of the gradient is greater than the
+    /// `threshold`.
+    fn gradient_edge_localization(
         width: u32,
         height: u32,
         del_x: &Vec<f64>,
         del_y: &Vec<f64>,
         threshold: u32) -> CanvasImage {
         assert_eq!(del_x.len(), del_y.len());
-        assert_eq!((width * height) as usize, del_x.len());
+        // 4 channels in the del_x and del_y, one for each channel, so we need to multiply by 4
+        assert_eq!((width * height) as usize * 4, del_x.len());
 
-        let combined = Iterator::zip(del_x.iter(), del_y.iter());
+        let combined = Iterator::zip(
+            del_x.as_slice().chunks_exact(4),
+            del_y.as_slice().chunks_exact(4));
 
         let rgba = combined
             // calculate the magnitude of the gradient
             .map(|(x, y)| {
-                x.abs() + y.abs()
+                // you can't collect into an array because the size is not known at compile time
+                let magnitudes: Vec<_> =
+                    izip!(x.iter(), y.iter())
+                        .map(|(x, y)| x.abs() + y.abs())
+                        .collect();
+
+                [magnitudes[0], magnitudes[1], magnitudes[2], magnitudes[3]]
             })
-            .flat_map(|gradient| {
-                if gradient > threshold as f64 {
-                    WHITE
-                } else {
-                    BLACK
-                }
+            .flat_map(|[r, g, b, _a]| {
+                [
+                    if r > threshold as f64 { 255 } else { 0 },
+                    if g > threshold as f64 { 255 } else { 0 },
+                    if b > threshold as f64 { 255 } else { 0 },
+                    255, // just assume the alpha channel is always 255
+                ]
             });
 
         let buffer = Vec::from_iter(rgba);
@@ -230,7 +251,7 @@ impl CanvasImage {
         let del_x = self.convolve(&kernel_x, BorderStrategy::Reflective);
         let del_y = self.convolve(&kernel_y, BorderStrategy::Reflective);
 
-        CanvasImage::greyscale_gradient(self.width, self.height, &del_x, &del_y, threshold)
+        CanvasImage::gradient_edge_localization(self.width, self.height, &del_x, &del_y, threshold)
     }
 
     // TODO: add noise reduction and edge enhancement
@@ -250,7 +271,7 @@ impl CanvasImage {
         let del_x = self.convolve(&kernel_x, BorderStrategy::Reflective);
         let del_y = self.convolve(&kernel_y, BorderStrategy::Reflective);
 
-        CanvasImage::greyscale_gradient(self.width, self.height, &del_x, &del_y, threshold)
+        CanvasImage::gradient_edge_localization(self.width, self.height, &del_x, &del_y, threshold)
     }
 
 
@@ -311,6 +332,20 @@ pub fn add_pepper(image: ImageData, p: f64) -> Result<ImageData, String> {
     image.add_pepper(p)
         .map_err(|e| e.to_string())?;
     Ok(image.into())
+}
+
+#[wasm_bindgen]
+pub fn prewitt_edge(image: ImageData, threshold: f64) -> ImageData {
+    let image = CanvasImage::from_image_data(image);
+    let edge_map = image.prewitt_edge(threshold as u32);
+    edge_map.into()
+}
+
+#[wasm_bindgen]
+pub fn sobel_edge(image: ImageData, threshold: f64) -> ImageData {
+    let image = CanvasImage::from_image_data(image);
+    let edge_map = image.sobel_edge(threshold as u32);
+    edge_map.into()
 }
 
 
