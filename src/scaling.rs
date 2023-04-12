@@ -99,8 +99,8 @@ pub fn scale_bilinear(image: &CanvasImage, new_width: u32, new_height: u32) -> C
             let src_y = (y_ratio * height).min(height);
 
 
-            let x_diff = src_x - src_x.floor();
-            let y_diff = src_y - src_y.floor();
+            let x_diff = (src_x - src_x.floor()) / src_x;
+            let y_diff = (src_y - src_y.floor()) / src_y;
 
             let top_left = image.rgba(src_x.floor() as u32, src_y.floor() as u32).unwrap();
             let top_right = image.rgba(src_y.ceil() as u32, src_y.floor() as u32).unwrap();
