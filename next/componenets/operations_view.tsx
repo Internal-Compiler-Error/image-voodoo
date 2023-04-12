@@ -9,14 +9,18 @@ import {
   ShearOpration,
   ScaleOperation,
   EqualizeOperation,
-  MinFilterOperation, MedianFilterOperation, MaxFilterOperation,
+  MinFilterOperation,
+  MedianFilterOperation,
+  MaxFilterOperation,
+  GreyScaleOperation,
+  CropRightOperation,
+  CropBottomOperation, AddSaltOperation, AddPepperOperation,
 } from "@/store";
-import {Box, Button, Card, CardActions, CardContent, Grid, Typography} from "@mui/material";
+import {Box, Button, Card, CardActions, CardContent, Grid, Paper, Typography} from "@mui/material";
 import assert from "assert";
+import {styled} from "@mui/system";
 
 function PowerOperationCard(props: { operation: PowerOperation }) {
-  // assert(props.operation.variant === "Power")
-
   return <Card variant="outlined">
     <CardContent>
       <Typography variant="h5">Power</Typography>
@@ -26,8 +30,6 @@ function PowerOperationCard(props: { operation: PowerOperation }) {
 }
 
 function LinearOperationCard(props: { operation: LinearOperation }) {
-  // assert(props.operation.variant === "Linear")
-
   return <Card variant="outlined">
     <CardContent>
       <Typography variant="h5">Linear</Typography>
@@ -38,8 +40,6 @@ function LinearOperationCard(props: { operation: LinearOperation }) {
 }
 
 function RotationOperationCard(props: { operation: RotationOperation }) {
-  // assert(props.operation.variant === "Rotation")
-
   return <Card variant="outlined">
     <CardContent>
       <Typography variant="h5">Rotation</Typography>
@@ -48,20 +48,56 @@ function RotationOperationCard(props: { operation: RotationOperation }) {
   </Card>
 }
 
+function AddSaltOperationCard (props: { operation: AddSaltOperation }) {
+  return <Card variant="outlined">
+    <CardContent>
+      <Typography variant="h5">Add Salt</Typography>
+      <Typography variant="h6">probability: {props.operation.probability}</Typography>
+    </CardContent>
+  </Card>
+}
+
+function AddPepperOperationCard(props: { operation: AddPepperOperation }) {
+  return <Card variant="outlined">
+    <CardContent>
+      <Typography variant="h5">Add Pepper</Typography>
+      <Typography variant="h6">probability: {props.operation.probability} </Typography>
+    </CardContent>
+  </Card>
+}
+
 function ConvolutionOperationCard(props: { operation: ConvolutionOperation }) {
-  // assert(props.operation.variant === "Convolution")
+  const {kernel, width} = props.operation;
+
+
+
+  const Item = styled(Paper)(({ theme }) => ({
+    padding: theme.spacing(2),
+    textAlign: 'center',
+    color: theme.palette.text.secondary,
+  }));
+
 
   return <Card variant="outlined">
     <CardContent>
       <Typography variant="h5">Convolution</Typography>
-      <Typography variant="h6">kernel: {props.operation.kernel}</Typography>
+      <Grid
+          justifyContent="space-between"
+          container
+          spacing={1}>
+        {
+          kernel.map((cell, index) =>
+              <Grid item key={index} xs={12 / width}>
+                <Item>{cell}</Item>
+              </Grid>
+          )
+        }
+      </Grid>
     </CardContent>
   </Card>
 }
 
 function EqualizeOperationCard(props: { operation: EqualizeOperation }) {
-  // assert(props.operation.variant === "Equalize")
-
   return <Card variant="outlined">
     <CardContent>
       <Typography variant="h5">Equalize</Typography>
@@ -70,8 +106,6 @@ function EqualizeOperationCard(props: { operation: EqualizeOperation }) {
 }
 
 function MinFilterOperationCard(props: { operation: MinFilterOperation }) {
-  // assert(props.operation.variant === "MinFilter")
-
   return <Card variant="outlined">
     <CardContent>
       <Typography variant="h5">Min Filter</Typography>
@@ -81,8 +115,6 @@ function MinFilterOperationCard(props: { operation: MinFilterOperation }) {
 }
 
 function MaxFilterOperationCard(props: { operation: MaxFilterOperation }) {
-  // assert(props.operation.variant === "MaxFilter")
-
   return <Card variant="outlined">
     <CardContent>
       <Typography variant="h5">Max Filter</Typography>
@@ -93,8 +125,6 @@ function MaxFilterOperationCard(props: { operation: MaxFilterOperation }) {
 
 
 function MedianFilterOperationCard(props: { operation: MedianFilterOperation }) {
-  // assert(props.operation.variant === "MedianFilter")
-
   return <Card variant="outlined">
     <CardContent>
       <Typography variant="h5">Median Filter</Typography>
@@ -104,8 +134,6 @@ function MedianFilterOperationCard(props: { operation: MedianFilterOperation }) 
 }
 
 function ShearOperationCard(props: { operation: ShearOpration }) {
-  // assert(props.operation.variant === "Shear")
-
   return <Card variant="outlined">
     <CardContent>
       <Typography variant="h5">Shear</Typography>
@@ -116,14 +144,48 @@ function ShearOperationCard(props: { operation: ShearOpration }) {
 }
 
 function ScaleOperationCard(props: { operation: ScaleOperation }) {
-  // assert(props.operation.variant === "Scale")
-
   return <Card variant="outlined">
     <CardContent>
       <Typography variant="h5">Scale</Typography>
       <Typography variant="h6">Width Factor: {props.operation.width_factor}</Typography>
       <Typography variant="h6">Height Factor: {props.operation.height_factor}
       </Typography>
+    </CardContent>
+  </Card>
+}
+
+function GreyScaleOperationCard(props: { operation: GreyScaleOperation }) {
+  return <Card variant="outlined">
+    <CardContent>
+      <Typography variant="h5">GreyScale</Typography>
+    </CardContent>
+  </Card>
+}
+
+function CropRightOperationCard(props: { operation: CropRightOperation }) {
+  return <Card variant="outlined">
+    <CardContent>
+      <Typography variant="h5">Crop Right</Typography>
+      <Typography variant="h6">removal: {props.operation.removal}</Typography>
+    </CardContent>
+  </Card>
+}
+
+function CropBottomOperationCard(props: { operation: CropBottomOperation }) {
+  return <Card variant="outlined">
+    <CardContent>
+      <Typography variant="h5">Crop Bottom</Typography>
+      <Typography variant="h6">removal: {props.operation.removal}
+      </Typography>
+    </CardContent>
+  </Card>
+}
+
+function FlipOperationCard(props: { operation: FlipOperation }) {
+  return <Card variant="outlined">
+    <CardContent>
+      <Typography variant="h5">Flip</Typography>
+      <Typography variant="h6">axis: {props.operation.axis}</Typography>
     </CardContent>
   </Card>
 }
@@ -153,20 +215,19 @@ function OperationCard(props: { operation: Operation }) {
       return <MaxFilterOperationCard operation={props.operation}/>
     case "MedianFilter":
       return <MedianFilterOperationCard operation={props.operation}/>
+    case "GreyScale":
+      return <GreyScaleOperationCard operation={props.operation}/>
+    case "CropRight":
+      return <CropRightOperationCard operation={props.operation}/>
+    case "CropBottom":
+      return <CropBottomOperationCard operation={props.operation}/>
+    case "AddSalt":
+      return <AddSaltOperationCard operation={props.operation}/>
+    case "AddPepper":
+      return <AddPepperOperationCard operation={props.operation}/>
     default:
-      return <Box>Unknown Operation</Box>
+      return <Card><CardContent>Unknown Operation</CardContent></Card>
   }
-}
-
-function FlipOperationCard(props: { operation: FlipOperation }) {
-  // assert(props.operation.variant === "Flip")
-
-  return <Card variant="outlined">
-    <CardContent>
-      <Typography variant="h5">Flip</Typography>
-      <Typography variant="h6">axis: {props.operation.axis}</Typography>
-    </CardContent>
-  </Card>
 }
 
 
@@ -189,7 +250,7 @@ export default function OperationsView(props: { operations: Operation[] }) {
           container
           direction="row"
           justifyContent="flex-start"
-          alignItems="flex-start"
+          alignItems="stretch"
           spacing={1}>
         {props.operations.map((operation, index) =>
             <Grid item key={index}>

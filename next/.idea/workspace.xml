@@ -5,18 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="48102704-3dec-41d6-a9b3-6619007def3b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../src/canvas_image/crop.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/componenets/noise.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../src/js_result.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/../Cargo.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/affine.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../src/affine.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/canvas_image.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../src/canvas_image.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/componenets/convolution_form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/convolution_form.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/componenets/crop.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/crop.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/componenets/misc.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/misc.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/componenets/operations_view.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/operations_view.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/componenets/scaling_form.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/componenets/scaling_form.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pages/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/pages/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/store.ts" beforeDir="false" afterPath="$PROJECT_DIR$/store.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../src/canvas_image/edge_detection.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../src/canvas_image/edge_detection.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/canvas_image/filters.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../src/canvas_image/filters.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/convolution.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../src/convolution.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/flip.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../src/flip.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/histogram.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../src/histogram.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../src/lib.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../src/scaling.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../src/scaling.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/single_pixel_transformation.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../src/single_pixel_transformation.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../tests/web.rs" beforeDir="false" afterPath="$PROJECT_DIR$/../tests/web.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -139,7 +141,7 @@
       <workItem from="1680931482322" duration="58000" />
       <workItem from="1680931576069" duration="27643000" />
       <workItem from="1681052612509" duration="4359000" />
-      <workItem from="1681229450710" duration="14386000" />
+      <workItem from="1681229450710" duration="21750000" />
     </task>
     <servers />
   </component>

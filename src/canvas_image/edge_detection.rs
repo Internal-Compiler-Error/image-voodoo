@@ -6,6 +6,7 @@ use crate::convolution::{BorderStrategy, Kernel};
 use crate::image_index::reflective_indexed;
 use wasm_bindgen::prelude::*;
 use web_sys::ImageData;
+use rand::distributions::{Distribution, Bernoulli};
 
 const WHITE: [u8; 4] = [255, 255, 255, 255];
 const BLACK: [u8; 4] = [0, 0, 0, 255];
@@ -251,6 +252,35 @@ impl CanvasImage {
 
         CanvasImage::greyscale_gradient(self.width, self.height, &del_x, &del_y, threshold)
     }
+
+
+    /// Set noise to the image by performing a bernoulli trial for each pixel with probability p. If the trial succeeds,
+    /// `noise` is *set* as the pixel for *all* color channels.
+    pub fn set_bernoulli_noise(&mut self, p: f64, noise: u8) -> color_eyre::Result<()> {
+        assert!(p >= 0.0 && p <= 1.0, "p must be in [0, 1]");
+        let mut rng = rand::thread_rng();
+        let bernoulli = Bernoulli::new(p)?;
+
+        // for each pixel, perform a bernoulli trial with probability p, if true, set pixel to noise
+        self
+            .rgba_iter_mut()
+            .filter(|_| bernoulli.sample(&mut rng))
+            .for_each(|(r, g, b, _a)| {
+                *r = noise;
+                *g = noise;
+                *b = noise;
+            });
+
+        Ok(())
+    }
+
+    pub fn add_salt(&mut self, p: f64) -> color_eyre::Result<()> {
+        self.set_bernoulli_noise(p, 255)
+    }
+
+    pub fn add_pepper(&mut self, p: f64) -> color_eyre::Result<()> {
+        self.set_bernoulli_noise(p, 0)
+    }
 }
 
 #[wasm_bindgen]
@@ -265,6 +295,22 @@ pub fn laplacian_of_gaussian_edge(image: ImageData, threshold: f64) -> ImageData
     let image = CanvasImage::from_image_data(image);
     let edge_map = image.laplacian_of_gaussian_edge(threshold);
     edge_map.into()
+}
+
+#[wasm_bindgen]
+pub fn add_salt(image: ImageData, p: f64) -> Result<ImageData, String> {
+    let mut image = CanvasImage::from_image_data(image);
+    image.add_salt(p)
+        .map_err(|e| e.to_string())?;
+    Ok(image.into())
+}
+
+#[wasm_bindgen]
+pub fn add_pepper(image: ImageData, p: f64) -> Result<ImageData, String> {
+    let mut image = CanvasImage::from_image_data(image);
+    image.add_pepper(p)
+        .map_err(|e| e.to_string())?;
+    Ok(image.into())
 }
 
 

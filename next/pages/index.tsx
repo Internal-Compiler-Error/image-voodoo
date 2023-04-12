@@ -27,6 +27,8 @@ import ImageUploader from "@/componenets/image_uploader";
 import ShearForm from "@/componenets/shear_form";
 import ScaleForm from "@/componenets/scaling_form";
 import FlipForm from "@/componenets/flip_form";
+import Misc from "@/componenets/misc";
+import Crop from "@/componenets/crop";
 
 
 const LiveView = connect((state: State) => {
@@ -85,16 +87,31 @@ export default function Home() {
 
           <Grid
               container
-                direction="row"
-                justifyContent="space-between"
-                spacing={2}
-                alignItems="stretch">
+              direction="row"
+              justifyContent="space-between"
+              spacing={2}
+              alignItems="stretch">
             <Grid item xs={6}>
               <ImageUploader></ImageUploader>
             </Grid>
 
             <Grid item xs={6}>
               <Box>
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                    <Typography variant="h4">Misc</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails><Misc/></AccordionDetails>
+                </Accordion>
+
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                    <Typography variant="h4">Crop</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails><Crop/></AccordionDetails>
+                </Accordion>
+
+
                 <Accordion>
                   <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
                     <Typography variant="h4">Linear Transformation</Typography>

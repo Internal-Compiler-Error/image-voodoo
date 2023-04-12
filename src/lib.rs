@@ -14,6 +14,7 @@ pub mod flip;
 pub mod image_index;
 pub mod distance;
 pub mod color_space;
+pub mod js_result;
 
 const INIT: Once = Once::new();
 

@@ -1,7 +1,7 @@
 #![allow(unused)]
 
 use crate::canvas_image::CanvasImage;
-use crate::interpolation::{lerp};
+use crate::interpolation::{lerp, nearest_neighbor};
 use itertools::{iproduct, izip};
 use std::collections::HashSet;
 use std::fmt::format;
@@ -49,6 +49,39 @@ fn bi_linear_interpolation(
         .unwrap()
 }
 
+fn bi_nearest_neighbor_interpolation(
+    top_left: &RGBA,
+    top_right: &RGBA,
+    bottom_left: &RGBA,
+    bottom_right: &RGBA,
+    x_diff: f64,
+    y_diff: f64,
+) -> [u8; 4] {
+    // can't iterate over tuples so let's turn them into arrays
+    let top_left = [top_left.0, top_left.1, top_left.2, top_left.3];
+    let top_right = [top_right.0, top_right.1, top_right.2, top_right.3];
+    let bottom_left = [bottom_left.0, bottom_left.1, bottom_left.2, bottom_left.3];
+    let bottom_right = [bottom_right.0, bottom_right.1, bottom_right.2, bottom_right.3];
+
+    // another sad fact is we can't guarantee this is a 3 element array
+    let mut rgba: Vec<_> = izip!(top_left, top_right, bottom_left, bottom_right)
+        .take(3)
+        .map(|(top_left, top_right, bottom_left, bottom_right)| {
+            let top = nearest_neighbor(top_left as f64, top_right as f64, x_diff);
+            let bottom = nearest_neighbor(bottom_left as f64, bottom_right as f64, x_diff);
+
+            nearest_neighbor(top, bottom, y_diff).clamp(0., 255.) as u8
+        }).collect();
+
+    // keep the alpha channel as 255;
+    rgba.push(255);
+
+    // it's safe because I am not a fucking idiot
+    rgba
+        .try_into()
+        .unwrap()
+}
+
 pub fn scale_bilinear(image: &CanvasImage, new_width: u32, new_height: u32) -> CanvasImage {
     let width = image.width() as f64;
     let height = image.height() as f64;
@@ -62,8 +95,8 @@ pub fn scale_bilinear(image: &CanvasImage, new_width: u32, new_height: u32) -> C
             let y_ratio = y as f64 / (new_height as f64 - 1.);
 
 
-            let src_x = (x_ratio * width).min(width - 1.);
-            let src_y = (y_ratio * height).min(height - 1.);
+            let src_x = (x_ratio * width).min(width);
+            let src_y = (y_ratio * height).min(height);
 
 
             let x_diff = src_x - src_x.floor();

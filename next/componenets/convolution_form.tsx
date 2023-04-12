@@ -94,9 +94,9 @@ export default function ConvolutionForm() {
             </Grid>
 
 
-            <Grid item container spacing={1}>
+            <Grid item xs={12} container spacing={1} justifyContent="space-between">
               {grid.map((cell, index) =>
-                  <Grid key={index} item xs={12 / colNum}>
+                  <Grid key={index} item xs={Math.floor(12 / colNum)}>
                     <TextField onChange={e => handleNumberChange(e, index)}
                                type="number"
                                value={cell}

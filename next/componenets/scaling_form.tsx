@@ -29,19 +29,43 @@ export default function ScaleForm() {
 
         <Grid item xs>
           <FormControl fullWidth>
-            <TextField type="number" label="Scale in horizontal" value={xScale} onChange={onXScaleChange}/>
+            <TextField
+                type="number"
+                label="Scale in horizontal"
+                value={xScale}
+                onChange={onXScaleChange}
+                InputProps={
+                  {inputProps: {min: 1}}
+                }
+            />
           </FormControl>
         </Grid>
 
         <Grid item xs>
           <FormControl fullWidth>
-            <TextField type="number" label="Scale in vertical" value={yScale} onChange={onYScaleChange}/>
+            <TextField
+                type="number"
+                label="Scale in vertical"
+                value={yScale}
+                onChange={onYScaleChange}
+                InputProps={
+                  {inputProps: {min: 1}}
+                }
+            />
           </FormControl>
         </Grid>
       </Grid>
     </CardContent>
     <CardActions>
-      <Button variant="outlined" onClick={onClick}>Add to Pipeline</Button>
+      <Grid container spacing={2}>
+        <Grid item xs>
+          <Button fullWidth variant="outlined" onClick={onClick}>Scale via Bi-linear</Button>
+        </Grid>
+
+        <Grid item xs>
+          <Button fullWidth variant="outlined" onClick={onClick}>Scale via Nearest Neighbor</Button>
+        </Grid>
+      </Grid>
     </CardActions>
   </Card>
 }
