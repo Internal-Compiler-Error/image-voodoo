@@ -15,6 +15,8 @@
     "@mui/base": "^5.0.0-alpha.123",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.11.15",
+    "@react-buddy/ide-toolbox-next": "^2.4.0",
+    "@react-buddy/palette-mui": "^5.0.1",
     "@reduxjs/toolkit": "^1.9.3",
     "@types/node": "18.15.11",
     "@types/react": "18.0.31",
@@ -22,14 +24,13 @@
     "eslint": "8.37.0",
     "eslint-config-next": "13.2.4",
     "next": "13.2.4",
+    "pnpm": "^8.2.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-redux": "^8.0.5",
     "swr": "^2.1.1",
     "typescript": "5.0.3",
-    "wasm-image-voodoo": "file:../pkg",
-    "@react-buddy/ide-toolbox-next": "^2.4.0",
-    "@react-buddy/palette-mui": "^5.0.1"
+    "wasm-image-voodoo": "file:../pkg"
   },
   "devDependencies": {
     "@testing-library/react": "^14.0.0",

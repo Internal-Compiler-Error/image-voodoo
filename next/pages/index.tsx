@@ -66,8 +66,6 @@ const darkTheme = createTheme({
 
 export default function Home() {
   return <ThemeProvider theme={darkTheme}>
-    <img id="img-meme" src="https://s3.fission.codes/2022/10/rust_poster.png" hidden alt=""></img>
-
     <Paper
         variant="outlined"
         style={{

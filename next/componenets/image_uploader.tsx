@@ -1,4 +1,4 @@
-import {Button, Card, CardActions, CardContent, FormControl, Input, Typography} from "@mui/material";
+import {Box, Button, Card, CardActions, CardContent, FormControl, Input, Typography} from "@mui/material";
 // @ts-ignore
 import {get} from '@andreekeberg/imagedata';
 import {ChangeEvent} from "react";
@@ -51,7 +51,6 @@ export default function ImageUploader() {
 
   return <Card>
     <CardContent>
-      {/*<Typography variant="h4">Image Uploader</Typography>*/}
     </CardContent>
 
     <CardActions>
@@ -76,6 +75,16 @@ export default function ImageUploader() {
       </form>
     </CardActions>
 
-    <ImageCanvas/>
+    <div
+        style={{
+          minWidth: "700px",
+          width: "700px",
+          height: "700px",
+          border: "thick green solid",
+        }}
+    >
+      <ImageCanvas/>
+    </div>
+
   </Card>
 }
