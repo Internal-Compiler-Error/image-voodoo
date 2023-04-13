@@ -1,3 +1,7 @@
+use wasm_bindgen::prelude::*;
+use web_sys::ImageData;
+use crate::canvas_image::CanvasImage;
+
 /// Convert sRGB to linear RGB
 pub trait Linearize {
     fn linearize(&self) -> f64;
@@ -27,4 +31,11 @@ pub fn to_srgb(linear: f64) -> f64 {
     } else {
         1.055 * linear.powf(1.0 / 2.4) - 0.055
     }
+}
+
+#[wasm_bindgen]
+pub fn faster_greyscale(image: ImageData) -> Vec<u8> {
+    let mut image = CanvasImage::from_image_data(image);
+    image.convert_to_greyscale();
+    image.into()
 }

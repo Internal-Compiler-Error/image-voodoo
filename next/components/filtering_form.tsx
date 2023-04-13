@@ -31,11 +31,6 @@ export default function FilteringForm() {
 
 
   return <Card>
-    {/*<CardContent>*/}
-    {/*  <Typography variant="body1">*/}
-    {/*    Some default filters can be added directly, or you can do it manually using the convolution input form.*/}
-    {/*  </Typography>*/}
-    {/*</CardContent>*/}
     <CardActions>
       <Grid container
             direction="row"

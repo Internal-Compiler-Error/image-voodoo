@@ -1,4 +1,4 @@
-import {useEffect} from "react";
+import {useEffect, useRef} from "react";
 import assert from "assert";
 import {useAppDispatch} from "@/store";
 import {blobToPNG} from "@/components/image_uploader";
@@ -6,22 +6,13 @@ import {blobToPNG} from "@/components/image_uploader";
 
 export default function ImageView(props: { image: ImageData | undefined, }) {
   const dispatch = useAppDispatch();
+  const canvas = useRef<HTMLCanvasElement>(null);
 
   // set the canvas size to the size of roughly 95% of the parent
   useEffect(() => {
-    // const canvas = document.getElementById("image_view_canvas") as HTMLCanvasElement;
-    // // @ts-ignore
-    // const width = canvas.parentElement?.clientWidth / 1.05;
-    //
-    // if (width) {
-    //   canvas.width = width;
-    //   canvas.height = width;
-    // }
-
-    const canvas = document.getElementById("image_view_canvas") as HTMLCanvasElement;
-    const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+    // @ts-ignore
+    const context = canvas.current.getContext("2d") as CanvasRenderingContext2D;
     context.imageSmoothingEnabled = false;
-
   }, []);
 
 
@@ -34,15 +25,15 @@ export default function ImageView(props: { image: ImageData | undefined, }) {
 
       // convert image from ImageData to ImageBitmap
       const bitmap = await createImageBitmap(props.image);
-      const canvas = document.getElementById("image_view_canvas") as HTMLCanvasElement;
-      canvas.width = width;
-      canvas.height = height;
+      const canvas_cur = canvas.current;
 
-
-      const ctx = canvas.getContext("2d");
+      assert(canvas_cur !== null)
+      canvas_cur.width = width;
+      canvas_cur.height = height;
+      const ctx = canvas_cur.getContext("2d");
       assert(ctx !== null);
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, canvas_cur.width, canvas_cur.height);
       ctx.drawImage(bitmap, 0, 0);
     }
 
@@ -61,7 +52,7 @@ export default function ImageView(props: { image: ImageData | undefined, }) {
     }
   }, [dispatch, props.image])
 
-  return <canvas id="image_view_canvas"
+  return <canvas ref={canvas}
                  style={{
                    border: "medium dashed red",
                    width: "100%",

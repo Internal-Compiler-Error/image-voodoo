@@ -1,8 +1,8 @@
+use crate::histogram::Histogram;
+use itertools::iproduct;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::Clamped;
 use web_sys::ImageData;
-use crate::histogram::Histogram;
-
 
 pub struct CanvasImage {
     data: Vec<u8>,
@@ -12,20 +12,33 @@ pub struct CanvasImage {
 
 mod iterator;
 
-pub use iterator::*;
 use crate::image_index;
 use crate::image_index::{CircularIndexedImage, ReflectiveIndexedImage, ZeroPaddedImage};
+pub use iterator::*;
+
+use wasm_rs_dbg::dbg;
 
 /// Consumes the canvas image and returns an ImageData for the browser
 impl Into<ImageData> for CanvasImage {
     fn into(mut self) -> ImageData {
-        ImageData::new_with_u8_clamped_array_and_sh(Clamped(&mut self.data), self.width, self.height).unwrap()
+        ImageData::new_with_u8_clamped_array_and_sh(
+            Clamped(&mut self.data),
+            self.width,
+            self.height,
+        )
+        .unwrap()
     }
 }
 
 impl From<ImageData> for CanvasImage {
     fn from(image_data: ImageData) -> Self {
         CanvasImage::from_image_data(image_data)
+    }
+}
+
+impl Into<Vec<u8>> for CanvasImage {
+    fn into(self) -> Vec<u8> {
+        self.data
     }
 }
 
@@ -125,7 +138,6 @@ impl CanvasImage {
         Histogram::from_channel_iterator(&mut r_channel)
     }
 
-
     /// I am 99% sure this is useless in most cases
     pub fn alpha_histogram(&self) -> Histogram {
         let mut a_channel = self.a_iter();
@@ -140,32 +152,25 @@ impl CanvasImage {
         let mut g_channel = self.g_iter();
         let mut b_channel = self.b_iter();
 
-        let r_hist = Histogram::from_channel_iterator(&mut r_channel)
-            .cumulative_normalized();
-        let g_hist = Histogram::from_channel_iterator(&mut g_channel)
-            .cumulative_normalized();
-        let b_hist = Histogram::from_channel_iterator(&mut b_channel)
-            .cumulative_normalized();
+        let r_hist = Histogram::from_channel_iterator(&mut r_channel).cumulative_normalized();
+        let g_hist = Histogram::from_channel_iterator(&mut g_channel).cumulative_normalized();
+        let b_hist = Histogram::from_channel_iterator(&mut b_channel).cumulative_normalized();
 
         let r_bucket = r_hist.bucket();
         let g_bucket = g_hist.bucket();
         let b_bucket = b_hist.bucket();
 
-        image
-            .as_mut_slice()
-            .chunks_exact_mut(4)
-            .for_each(|chunk| {
-                let r_freq = r_bucket[chunk[0] as usize] * 255.0;
-                let g_freq = g_bucket[chunk[1] as usize] * 255.0;
-                let b_freq = b_bucket[chunk[2] as usize] * 255.0;
+        image.as_mut_slice().chunks_exact_mut(4).for_each(|chunk| {
+            let r_freq = r_bucket[chunk[0] as usize] * 255.0;
+            let g_freq = g_bucket[chunk[1] as usize] * 255.0;
+            let b_freq = b_bucket[chunk[2] as usize] * 255.0;
 
-                chunk[0] = (r_freq).clamp(0.0, 255.0) as u8;
-                chunk[1] = (g_freq).clamp(0.0, 255.0) as u8;
-                chunk[2] = (b_freq).clamp(0.0, 255.0) as u8;
+            chunk[0] = (r_freq).clamp(0.0, 255.0) as u8;
+            chunk[1] = (g_freq).clamp(0.0, 255.0) as u8;
+            chunk[2] = (b_freq).clamp(0.0, 255.0) as u8;
 
-
-                // println!("{} {} {}", chunk[0], chunk[1], chunk[2]);
-            });
+            // println!("{} {} {}", chunk[0], chunk[1], chunk[2]);
+        });
 
         CanvasImage::from_vec_with_size(image, self.width, self.height)
     }
@@ -174,24 +179,61 @@ impl CanvasImage {
     /// sRGB -> Linear RGB -> Luminance -> sRGB
     /// alpha is left untouched
     pub fn convert_to_greyscale(&mut self) {
-        self
-            .rgba_iter_mut()
-            .for_each(|(r, g, b, _)| {
-                let mut linear_r = *r as f64;
-                let mut linear_g = *g as f64;
-                let mut linear_b = *b as f64;
+        self.rgba_iter_mut().for_each(|(r, g, b, _)| {
+            let mut linear_r = *r as f64;
+            let mut linear_g = *g as f64;
+            let mut linear_b = *b as f64;
 
-                linear_r = linear_r.linearize();
-                linear_g = linear_g.linearize();
-                linear_b = linear_b.linearize();
+            linear_r = linear_r.linearize();
+            linear_g = linear_g.linearize();
+            linear_b = linear_b.linearize();
 
-                let mut lumma = to_luminance(linear_r, linear_g, linear_b);
-                lumma = to_srgb(lumma);
+            let mut lumma = to_luminance(linear_r, linear_g, linear_b);
+            lumma = to_srgb(lumma);
 
-                *r = lumma.clamp(u8::MIN as f64, u8::MAX as f64) as u8;
-                *g = lumma.clamp(u8::MIN as f64, u8::MAX as f64) as u8;
-                *b = lumma.clamp(u8::MIN as f64, u8::MAX as f64) as u8;
-            });
+            *r = lumma.clamp(u8::MIN as f64, u8::MAX as f64) as u8;
+            *g = lumma.clamp(u8::MIN as f64, u8::MAX as f64) as u8;
+            *b = lumma.clamp(u8::MIN as f64, u8::MAX as f64) as u8;
+        });
+    }
+
+    /// Remove all pixels around the edges of the image that are transparent
+    pub fn trim(&mut self) {
+        // compute the bounding box of the image
+        let min_x = self.width;
+        let min_y = self.height;
+
+        let max_x = 0;
+        let max_y = 0;
+
+        let (min_x, min_y, max_x, max_y) = iproduct!(0..self.height, 0..self.width)
+            .filter(|(y, x)| self.a(*x, *y).expect("out of bounds") != 0)
+            .fold(
+                (min_x, min_y, max_x, max_y),
+                |(min_x, min_y, max_x, max_y), (y, x)| {
+                    (min_x.min(x), min_y.min(y), max_x.max(x), max_y.max(y))
+                },
+            );
+
+
+        let trimmed_width = max_x - min_x;
+        let trimmed_height = max_y - min_y;
+
+        // recreate the image with the new dimensions
+        let rgba = iproduct!(0..trimmed_height, 0..trimmed_width).flat_map(|(y, x)| {
+            let r = self.r(x + min_x, y + min_y).expect("out of bounds");
+            let g = self.g(x + min_x, y + min_y).expect("out of bounds");
+            let b = self.b(x + min_x, y + min_y).expect("out of bounds");
+            let a = self.a(x + min_x, y + min_y).expect("out of bounds");
+
+            [r, g, b, a]
+        });
+
+
+        dbg!(trimmed_width, trimmed_height);
+        self.data = rgba.collect();
+        self.height = trimmed_height;
+        self.width = trimmed_width;
     }
 }
 
@@ -301,14 +343,13 @@ impl ReflectiveIndexedImage for CanvasImage {
     }
 }
 
+mod crop;
 mod edge_detection;
 mod filters;
-mod crop;
 
-pub use filters::*;
+use crate::color_space::{to_luminance, to_srgb, Linearize};
 pub use edge_detection::*;
-use crate::color_space::{Linearize, to_luminance, to_srgb};
-
+pub use filters::*;
 
 #[wasm_bindgen]
 pub fn greyscale(image: ImageData) -> ImageData {
@@ -316,3 +357,4 @@ pub fn greyscale(image: ImageData) -> ImageData {
     canvas_image.convert_to_greyscale();
     canvas_image.into()
 }
+

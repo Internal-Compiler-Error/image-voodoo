@@ -3,7 +3,7 @@
 use crate::canvas_image::CanvasImage;
 use itertools::{iproduct, Itertools, MinMaxResult};
 use wasm_bindgen::prelude::wasm_bindgen;
-use web_sys::ImageData;
+use web_sys::{ImageData};
 use nalgebra::{Matrix2, Matrix3, Vector2, Vector3};
 
 const TRANSPARENT: [u8; 4] = [0, 0, 0, 0];
@@ -101,7 +101,9 @@ fn width_height_after_rotation(radian: f64, width: f64, height: f64) -> (u32, u3
 /// Rotate the image by degree, enlarge the image to fit the rotated image, empty spaces are filled
 /// using bilinear interpolation.
 pub fn rotate_deg(image: &CanvasImage, degree: f64) -> CanvasImage {
-    rotate_rad(image, degree / 180f64 * std::f64::consts::PI)
+    let mut image = rotate_rad(image, degree / 180f64 * std::f64::consts::PI);
+    image.trim();
+    image
 }
 
 /*********** Matrix Zone ***********/
@@ -296,7 +298,7 @@ mod tests {
     #[test]
     fn meme_rotate() {
         // read the picture from file
-        let image = image::open("meme.png").unwrap();
+        let image = image::open("rotated.png").unwrap();
 
         // convert to RGBA
         let image = image.into_rgba8();
@@ -315,7 +317,7 @@ mod tests {
             rotated.rgba_slice().clone(),
         )
             .unwrap();
-        image.save("meme_rotated.png").unwrap();
+        image.save("meme_rotated_2.png").unwrap();
     }
 
     #[test]
