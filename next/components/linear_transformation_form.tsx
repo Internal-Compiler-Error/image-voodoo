@@ -36,18 +36,15 @@ export default function LinearTransformationForm() {
 
   return <Card elevation={3}>
     <CardContent>
-      {/*<Typography variant="h4">Linear Transformation</Typography>*/}
       <form onSubmit={onSubmit}>
         <FormControl fullWidth>
           <Grid container spacing={2}>
             <Grid item xs={6}>
-              {/*<InputLabel id="linear-transfomration-gain-label">Gain</InputLabel>*/}
               <TextField fullWidth label="Gain" onChange={gainChange} id="linear-transfomration-gain" type="number"
                          value={gain}/>
             </Grid>
 
             <Grid item xs={6}>
-              {/*<InputLabel id="linear-transformation-bias-label">Bias</InputLabel>*/}
               <TextField fullWidth label="Bias" onChange={biasChange} id="linear-transformation-bias" type="number"
                          value={bias}/>
             </Grid>

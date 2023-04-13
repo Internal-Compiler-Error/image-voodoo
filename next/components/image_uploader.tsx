@@ -53,7 +53,7 @@ export default function ImageUploader() {
     <CardContent>
     </CardContent>
 
-    <CardActions>s
+    <CardActions>
       <form>
         <FormControl>
           <input

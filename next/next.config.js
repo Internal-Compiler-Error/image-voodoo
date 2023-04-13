@@ -2,9 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   webpack(config) {
-    config.experiments = {
-      layers: true,
-      asyncWebAssembly: true}
+    config.experiments = {asyncWebAssembly: true}
     return config
   }
 }
