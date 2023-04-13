@@ -18,18 +18,15 @@ import OperationsView from "@/components/operations_view";
 import RotationForm from "@/components/rotation_form";
 import PowerForm from "@/components/power_form";
 import HistogramForm from "@/components/histogram_form";
-import GPT4 from "@/components/gpt4_magic";
 import FilteringForm from "@/components/filtering_form";
 import EdgeForm from "@/components/edge_form";
 import {green, pink, purple} from "@mui/material/colors";
-import ImageViewer from "@/pages/image_viewer";
 import ImageUploader from "@/components/image_uploader";
 import ShearForm from "@/components/shear_form";
 import ScaleForm from "@/components/scaling_form";
 import FlipForm from "@/components/flip_form";
 import Misc from "@/components/misc";
 import Crop from "@/components/crop";
-import Image from "next/image";
 
 
 const LiveView = connect((state: State) => {
@@ -47,20 +44,23 @@ const accentPink = pink.A200;
 const darkPink = pink[900];
 
 const darkTheme = createTheme({
+  // palette: {
+  //   primary: {
+  //     light: accentPink,
+  //     main: primaryPink,
+  //     dark: darkPink,
+  //     contrastText: "#fff"
+  //   },
+  //   mode: "dark",
+  //   secondary: {
+  //     light: accentGreen,
+  //     main: primaryGreen,
+  //     dark: darkGreen,
+  //     contrastText: "#fff"
+  //   }
+  // }
   palette: {
-    primary: {
-      light: accentPink,
-      main: primaryPink,
-      dark: darkPink,
-      contrastText: "#fff"
-    },
-    mode: "dark",
-    secondary: {
-      light: accentGreen,
-      main: primaryGreen,
-      dark: darkGreen,
-      contrastText: "#fff"
-    }
+    mode: "light",
   }
 })
 
