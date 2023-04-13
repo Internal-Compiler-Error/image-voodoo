@@ -174,7 +174,9 @@ function evaluatePipeline(image: ImageData, operations: Operation[]) {
         const kernel = Kernel.from_vec(arr, operation.width, operation.height);
         return convolve(image, kernel, 0);
       case "Rotation":
-        return rotate(image, operation.angle);
+        const rotated =  rotate(image, operation.angle);
+        console.log(rotated);
+        return rotated;
       case "Flip":
         if (operation.axis === "x") {
           return flip_along_x_axis(image);
@@ -207,7 +209,7 @@ function evaluatePipeline(image: ImageData, operations: Operation[]) {
         return prewitt_edge(image, operation.threshold);
       case "SobelEdge":
         return sobel_edge(image, operation.threshold);
-        case "ScaleNearestNeighbor":
+      case "ScaleNearestNeighbor":
         return scale_via_nearest_neighbor(image, operation.width_factor, operation.height_factor);
       case "AddSalt": {
         try {

@@ -22,20 +22,14 @@
     "eslint": "8.37.0",
     "eslint-config-next": "13.2.4",
     "next": "13.2.4",
+    "pnpm": "^8.2.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-redux": "^8.0.5",
     "swr": "^2.1.1",
     "typescript": "5.0.3",
-    "wasm-image-voodoo": "file:../pkg",
-    "@react-buddy/ide-toolbox-next": "^2.4.0",
-    "@react-buddy/palette-mui": "^5.0.1"
+    "wasm-image-voodoo": "file:../pkg"
   },
   "devDependencies": {
-    "@testing-library/react": "^14.0.0",
-    "autoprefixer": "^10.4.14",
-    "jest": "^29.5.0",
-    "postcss": "^8.4.21",
-    "tailwindcss": "^3.3.1"
   }
 }
