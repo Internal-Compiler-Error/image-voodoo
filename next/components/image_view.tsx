@@ -1,7 +1,7 @@
 import {useEffect} from "react";
 import assert from "assert";
 import {useAppDispatch} from "@/store";
-import {blobToPNG} from "@/componenets/image_uploader";
+import {blobToPNG} from "@/components/image_uploader";
 
 
 export default function ImageView(props: { image: ImageData | undefined, }) {

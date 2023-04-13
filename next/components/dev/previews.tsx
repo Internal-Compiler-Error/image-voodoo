@@ -1,7 +1,7 @@
 import React from "react";
 import {ComponentPreview, Previews} from "@react-buddy/ide-toolbox-next";
 import {PaletteTree} from "./palette";
-import ShearForm from "@/componenets/shear_form";
+import ShearForm from "@/components/shear_form";
 
 const ComponentPreviews = () => {
   return (

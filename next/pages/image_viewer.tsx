@@ -1,4 +1,4 @@
-import ImageView from "@/componenets/image_view";
+import ImageView from "@/components/image_view";
 import {useEffect, useState} from "react";
 import assert from "assert";
 import useSWR from "swr";

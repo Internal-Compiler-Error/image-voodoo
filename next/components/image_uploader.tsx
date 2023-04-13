@@ -4,7 +4,7 @@ import {get} from '@andreekeberg/imagedata';
 import {ChangeEvent} from "react";
 import {State, useAppDispatch} from "@/store";
 import {connect} from "react-redux";
-import ImageView from "@/componenets/image_view";
+import ImageView from "@/components/image_view";
 import UploadIcon from '@mui/icons-material/Upload';
 
 
@@ -53,7 +53,7 @@ export default function ImageUploader() {
     <CardContent>
     </CardContent>
 
-    <CardActions>
+    <CardActions>s
       <form>
         <FormControl>
           <input
