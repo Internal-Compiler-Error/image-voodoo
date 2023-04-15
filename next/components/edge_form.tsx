@@ -17,8 +17,10 @@ export default function EdgeForm() {
   }
 
   const doLaplacianOfGaussian = () => {
-    dispatch({type: "app/addLaplacianOfGaussianEdgeOperation", payload: {threshold: threshold}});
-    dispatch({type: "app/runPipeline"});
+    setTimeout(() => {
+      dispatch({type: "app/addLaplacianOfGaussianEdgeOperation", payload: {threshold: threshold}});
+      dispatch({type: "app/runPipeline"});
+    }, 0);
   }
 
   const doPrewitt = () => {

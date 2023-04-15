@@ -1,5 +1,5 @@
-use std::slice::{ChunksExact, ChunksExactMut};
 use super::*;
+use std::slice::{ChunksExact, ChunksExactMut};
 
 /// An iterator over the RGBA values of an image. Goes from left to right, top to bottom.
 pub struct RBGAIterator<'a> {
@@ -37,10 +37,7 @@ impl Iterator for ChannelIterator<'_> {
     type Item = u8;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self
-            .iter
-            .next()
-            .map(|chunk| chunk[self.offset as usize])
+        self.iter.next().map(|chunk| chunk[self.offset as usize])
     }
 }
 
@@ -58,7 +55,6 @@ impl Iterator for RBGAIterator<'_> {
         })
     }
 }
-
 
 impl CanvasImage {
     /// returns an iterator over the RGBA values of the image

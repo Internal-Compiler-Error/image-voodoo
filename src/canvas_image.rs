@@ -215,7 +215,6 @@ impl CanvasImage {
                 },
             );
 
-
         let trimmed_width = max_x - min_x;
         let trimmed_height = max_y - min_y;
 
@@ -228,7 +227,6 @@ impl CanvasImage {
 
             [r, g, b, a]
         });
-
 
         dbg!(trimmed_width, trimmed_height);
         self.data = rgba.collect();
@@ -357,4 +355,3 @@ pub fn greyscale(image: ImageData) -> ImageData {
     canvas_image.convert_to_greyscale();
     canvas_image.into()
 }
-

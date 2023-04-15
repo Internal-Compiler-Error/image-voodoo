@@ -1,10 +1,10 @@
 //! Test suite for the Web and headless browsers.
 #![cfg(target_arch = "wasm32")]
-use wasm_bindgen_test::*;
-use web_sys::ImageData;
-use wasm_bindgen::Clamped;
 use image_voodoo::canvas_image::CanvasImage;
 use itertools::iproduct;
+use wasm_bindgen::Clamped;
+use wasm_bindgen_test::*;
+use web_sys::ImageData;
 
 wasm_bindgen_test_configure!(run_in_browser);
 
@@ -16,12 +16,7 @@ fn pass() {
 #[wasm_bindgen_test]
 fn r_access_work_as_expected() {
     // note this is in RGBA format
-    let image: Vec<u8> = vec![
-        0, 1, 2, 0,
-        3, 4, 5, 0,
-        6, 7, 8, 0,
-    ];
-
+    let image: Vec<u8> = vec![0, 1, 2, 0, 3, 4, 5, 0, 6, 7, 8, 0];
 
     let image = ImageData::new_with_u8_clamped_array_and_sh(Clamped(&image), 1, 3).unwrap();
     let image = CanvasImage::from_image_data(image);
@@ -35,12 +30,7 @@ fn r_access_work_as_expected() {
 #[wasm_bindgen_test]
 fn g_access_work_as_expected() {
     // note this is in RGBA format
-    let image: Vec<u8> = vec![
-        0, 1, 2, 0,
-        3, 4, 5, 0,
-        6, 7, 8, 0,
-    ];
-
+    let image: Vec<u8> = vec![0, 1, 2, 0, 3, 4, 5, 0, 6, 7, 8, 0];
 
     let image = ImageData::new_with_u8_clamped_array_and_sh(Clamped(&image), 1, 3).unwrap();
     let image = CanvasImage::from_image_data(image);
@@ -54,12 +44,7 @@ fn g_access_work_as_expected() {
 #[wasm_bindgen_test]
 fn b_access_work_as_expected() {
     // note this is in RGBA format
-    let image: Vec<u8> = vec![
-        0, 1, 2, 0,
-        3, 4, 5, 0,
-        6, 7, 8, 0,
-    ];
-
+    let image: Vec<u8> = vec![0, 1, 2, 0, 3, 4, 5, 0, 6, 7, 8, 0];
 
     let image = ImageData::new_with_u8_clamped_array_and_sh(Clamped(&image), 1, 3).unwrap();
     let image = CanvasImage::from_image_data(&image);

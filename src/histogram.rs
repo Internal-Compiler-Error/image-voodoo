@@ -1,6 +1,6 @@
+use crate::canvas_image::{CanvasImage, ChannelIterator};
 use float_cmp::approx_eq;
 use web_sys::ImageData;
-use crate::canvas_image::{CanvasImage, ChannelIterator};
 
 use wasm_bindgen::prelude::*;
 
@@ -31,10 +31,7 @@ impl Histogram {
     pub fn normalize(&mut self) {
         let sum = self.buckets.iter().sum::<f64>();
 
-        self
-            .buckets
-            .iter_mut()
-            .for_each(|x| *x /= sum);
+        self.buckets.iter_mut().for_each(|x| *x /= sum);
 
         #[cfg(debug_assertions)]
         debug_assert!(self.is_normalized());
@@ -43,15 +40,19 @@ impl Histogram {
     /// Build a *new* histogram that is the cumulative histogram of the current histogram
     pub fn cumulative(&self) -> Histogram {
         // cumulative and scans are the same thing
-        let cumulative: Vec<_> =
-            self.buckets.iter().scan(0f64, |sum, e| {
+        let cumulative: Vec<_> = self
+            .buckets
+            .iter()
+            .scan(0f64, |sum, e| {
                 *sum += e;
                 Some(*sum)
-            }).collect();
+            })
+            .collect();
 
-        Histogram { buckets: cumulative }
+        Histogram {
+            buckets: cumulative,
+        }
     }
-
 
     /// Build a *new* histogram that is the cumulative histogram of the current histogram and then
     /// normalize it
@@ -76,8 +77,8 @@ impl Histogram {
 
 #[cfg(test)]
 mod tests {
-    use image::{ImageBuffer, Rgba};
     use crate::canvas_image::CanvasImage;
+    use image::{ImageBuffer, Rgba};
 
     #[test]
     fn sanity() {
@@ -100,11 +101,10 @@ mod tests {
             equalized.vertical_size(),
             equalized.rgba_slice().clone(),
         )
-            .unwrap();
+        .unwrap();
         image.save("car_eq.png").unwrap();
     }
 }
-
 
 #[wasm_bindgen]
 pub fn equalize(image: ImageData) -> ImageData {

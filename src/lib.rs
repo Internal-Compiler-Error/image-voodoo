@@ -1,20 +1,19 @@
+use crate::utils::set_panic_hook;
 use std::sync::Once;
 use wasm_bindgen::prelude::*;
-use crate::utils::set_panic_hook;
 
-pub mod canvas_image;
-pub mod convolution;
-pub mod histogram;
-pub mod interpolation;
 pub mod affine;
+pub mod canvas_image;
+pub mod color_space;
+pub mod convolution;
+pub mod distance;
+pub mod flip;
+pub mod histogram;
+pub mod image_index;
+pub mod interpolation;
 pub mod scaling;
 pub mod single_pixel_transformation;
 pub mod utils;
-pub mod flip;
-pub mod image_index;
-pub mod distance;
-pub mod color_space;
-pub mod js_result;
 
 const INIT: Once = Once::new();
 
@@ -24,8 +23,6 @@ pub fn init() {
         set_panic_hook();
     });
 }
-
-
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.

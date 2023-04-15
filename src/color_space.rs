@@ -1,6 +1,6 @@
+use crate::canvas_image::CanvasImage;
 use wasm_bindgen::prelude::*;
 use web_sys::ImageData;
-use crate::canvas_image::CanvasImage;
 
 /// Convert sRGB to linear RGB
 pub trait Linearize {

@@ -1,7 +1,7 @@
+use num::integer::div_floor;
 use num::Integer;
 use num_traits::{abs, Signed};
 use std::fmt::Debug;
-use num::integer::div_floor;
 
 pub trait ZeroPaddedImage {
     fn r(&self, x: i32, y: i32) -> u8;
@@ -31,13 +31,12 @@ pub trait ReflectiveIndexedImage {
 /// F: the function that returns the value of the image at a given point
 /// C: the type of the coordinates of the image, such as u32, i32, etc.
 pub fn zero_padded<'a, F, C>(f: &'a F) -> impl Fn(C, C) -> u8 + 'a
-    where F: Fn(C, C) -> Option<u8>,
+where
+    F: Fn(C, C) -> Option<u8>,
 {
-    move |x, y| {
-        match f(x, y) {
-            Some(v) => v,
-            None => 0,
-        }
+    move |x, y| match f(x, y) {
+        Some(v) => v,
+        None => 0,
     }
 }
 
@@ -46,10 +45,11 @@ pub fn zero_padded<'a, F, C>(f: &'a F) -> impl Fn(C, C) -> u8 + 'a
 /// function will return the value of the image at the corresponding point in the domain.
 pub fn circular_indexed<'a, F, U, S>(f: &'a F, x_period: U, y_period: U) -> impl Fn(S, S) -> u8 + 'a
 // I am really only interested in the primitive types, so the Copy bound is fine
-    where F: Fn(U, U) -> Option<u8>,
-          U: Integer + Copy + TryFrom<S> + 'static,
-          S: Integer + Copy + Signed,
-          <U as TryFrom<S>>::Error: Debug
+where
+    F: Fn(U, U) -> Option<u8>,
+    U: Integer + Copy + TryFrom<S> + 'static,
+    S: Integer + Copy + Signed,
+    <U as TryFrom<S>>::Error: Debug,
 {
     let unsigned_abs = |x: S| {
         let value = U::try_from(abs(x)).unwrap();
@@ -64,10 +64,8 @@ pub fn circular_indexed<'a, F, U, S>(f: &'a F, x_period: U, y_period: U) -> impl
 
         let y_offset: U = unsigned_abs(y) % y_period;
 
-
         let x_extra_period: U = if x.is_negative() { x_period } else { zero };
         let y_extra_period: U = if y.is_negative() { y_period } else { zero };
-
 
         let x = if x.is_negative() {
             x_period + x_extra_period - x_offset
@@ -80,23 +78,25 @@ pub fn circular_indexed<'a, F, U, S>(f: &'a F, x_period: U, y_period: U) -> impl
             y_period + y_extra_period + y_offset
         };
 
-
         f(x % x_period, y % y_period).unwrap()
     }
 }
 
-
 /// Given a image that is only defined on a finite domain, this function will return a function that
 /// returns the value of the image at the given point. If the point is outside the domain, the
 /// function will return the value reflected across the boundary of the domain.
-pub fn reflective_indexed<'a, F, U, S, R>(f: &'a F, x_period: U, y_period: U) -> impl Fn(S, S) -> R + 'a
-    where F: Fn(U, U) -> Option<R>,
-          U: Integer + Copy + TryFrom<S> + 'static,
-          S: Integer + Copy + Signed + 'static,
-          <U as TryFrom<S>>::Error: Debug {
-    let unsigned_abs = |x: S| {
-        U::try_from(abs(x)).unwrap()
-    };
+pub fn reflective_indexed<'a, F, U, S, R>(
+    f: &'a F,
+    x_period: U,
+    y_period: U,
+) -> impl Fn(S, S) -> R + 'a
+where
+    F: Fn(U, U) -> Option<R>,
+    U: Integer + Copy + TryFrom<S> + 'static,
+    S: Integer + Copy + Signed + 'static,
+    <U as TryFrom<S>>::Error: Debug,
+{
+    let unsigned_abs = |x: S| U::try_from(abs(x)).unwrap();
 
     move |x, y| {
         let zero = U::zero();
@@ -105,7 +105,6 @@ pub fn reflective_indexed<'a, F, U, S, R>(f: &'a F, x_period: U, y_period: U) ->
 
         let x_offset = unsigned_abs(x) % x_period;
         let y_offset = unsigned_abs(y) % y_period;
-
 
         let x_base: U = if x_floored_period.is_even() {
             zero
@@ -135,7 +134,6 @@ pub fn reflective_indexed<'a, F, U, S, R>(f: &'a F, x_period: U, y_period: U) ->
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -159,7 +157,6 @@ mod tests {
             }
         }
     }
-
 
     #[test]
     fn zero_padded_returns_zero() {

@@ -1,9 +1,8 @@
-use itertools::iproduct;
-use wasm_bindgen::Clamped;
-use wasm_bindgen::prelude::*;
-use web_sys::ImageData;
 use crate::canvas_image::CanvasImage;
-
+use itertools::iproduct;
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::Clamped;
+use web_sys::ImageData;
 
 /// Flips the image horizontally, along the x-axis.
 #[wasm_bindgen]
@@ -28,7 +27,12 @@ pub fn flip_along_x_axis(image: ImageData) -> ImageData {
 
     let buffer = Vec::from_iter(rgba);
 
-    ImageData::new_with_u8_clamped_array_and_sh(Clamped(&buffer), image.horizontal_size(), image.vertical_size()).unwrap()
+    ImageData::new_with_u8_clamped_array_and_sh(
+        Clamped(&buffer),
+        image.horizontal_size(),
+        image.vertical_size(),
+    )
+    .unwrap()
 }
 
 /// Flips the image horizontally, along the x-axis.
@@ -53,5 +57,10 @@ pub fn flip_along_y_axis(image: ImageData) -> ImageData {
 
     let buffer = Vec::from_iter(rgba);
 
-    ImageData::new_with_u8_clamped_array_and_sh(Clamped(&buffer), image.horizontal_size(), image.vertical_size()).unwrap()
+    ImageData::new_with_u8_clamped_array_and_sh(
+        Clamped(&buffer),
+        image.horizontal_size(),
+        image.vertical_size(),
+    )
+    .unwrap()
 }

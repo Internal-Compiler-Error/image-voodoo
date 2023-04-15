@@ -1,14 +1,14 @@
-use std::ops;
-use itertools::iproduct;
-use num_traits::Zero;
-use rustfft::FftPlanner;
-use rustfft::num_complex::Complex;
-use wasm_bindgen::Clamped;
-use wasm_bindgen::prelude::wasm_bindgen;
-use web_sys::ImageData;
 use crate::canvas_image::CanvasImage;
 use crate::image_index::{CircularIndexedImage, ReflectiveIndexedImage, ZeroPaddedImage};
 use crate::utils;
+use itertools::iproduct;
+use num_traits::Zero;
+use rustfft::num_complex::Complex;
+use rustfft::FftPlanner;
+use std::ops;
+use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::Clamped;
+use web_sys::ImageData;
 
 #[wasm_bindgen]
 pub struct Kernel {
@@ -25,7 +25,6 @@ pub enum BorderStrategy {
     Reflective,
 }
 
-
 #[wasm_bindgen]
 pub fn convolve(image: ImageData, kernel: &Kernel, border_strategy: BorderStrategy) -> ImageData {
     utils::set_panic_hook();
@@ -35,31 +34,34 @@ pub fn convolve(image: ImageData, kernel: &Kernel, border_strategy: BorderStrate
     let convolved = image.convolve(kernel, border_strategy);
 
     // clamp and convert to u8
-    let rgba = convolved
-        .as_slice()
-        .chunks_exact(4)
-        .flat_map(|chunk| {
-            let r = chunk[0].clamp(0.0, 255.0) as u8;
-            let g = chunk[1].clamp(0.0, 255.0) as u8;
-            let b = chunk[2].clamp(0.0, 255.0) as u8;
-            let a = chunk[3].clamp(0.0, 255.0) as u8;
+    let rgba = convolved.as_slice().chunks_exact(4).flat_map(|chunk| {
+        let r = chunk[0].clamp(0.0, 255.0) as u8;
+        let g = chunk[1].clamp(0.0, 255.0) as u8;
+        let b = chunk[2].clamp(0.0, 255.0) as u8;
+        let a = chunk[3].clamp(0.0, 255.0) as u8;
 
-            [r, g, b, a]
-        });
+        [r, g, b, a]
+    });
 
     let mut buffer = Vec::from_iter(rgba);
-    ImageData::new_with_u8_clamped_array_and_sh(Clamped(&mut buffer), image.horizontal_size(), image.vertical_size()).unwrap()
+    ImageData::new_with_u8_clamped_array_and_sh(
+        Clamped(&mut buffer),
+        image.horizontal_size(),
+        image.vertical_size(),
+    )
+    .unwrap()
 }
-
 
 impl CanvasImage {
     /// Convolve the image with a kernel, using the specified border strategy.
     pub fn convolve(&self, kernel: &Kernel, border_strategy: BorderStrategy) -> Vec<f64> {
         // some rust lawyer please tell me how to do this better
-        let (r, g, b, a): (&dyn Fn(&CanvasImage, i32, i32) -> u8,
-                           &dyn Fn(&CanvasImage, i32, i32) -> u8,
-                           &dyn Fn(&CanvasImage, i32, i32) -> u8,
-                           &dyn Fn(&CanvasImage, i32, i32) -> u8) = match border_strategy {
+        let (r, g, b, a): (
+            &dyn Fn(&CanvasImage, i32, i32) -> u8,
+            &dyn Fn(&CanvasImage, i32, i32) -> u8,
+            &dyn Fn(&CanvasImage, i32, i32) -> u8,
+            &dyn Fn(&CanvasImage, i32, i32) -> u8,
+        ) = match border_strategy {
             BorderStrategy::Zero => (
                 &ZeroPaddedImage::r,
                 &ZeroPaddedImage::g,
@@ -80,15 +82,14 @@ impl CanvasImage {
             ),
         };
 
-
-        let mut buffer = Vec::with_capacity((self.vertical_size() * self.horizontal_size() * 4) as usize);
+        let mut buffer =
+            Vec::with_capacity((self.vertical_size() * self.horizontal_size() * 4) as usize);
         for y in 0..self.vertical_size() as isize {
             for x in 0..self.horizontal_size() as isize {
                 let mut r_acc = 0f64;
                 let mut g_acc = 0f64;
                 let mut b_acc = 0f64;
                 let mut a_acc = 0f64;
-
 
                 for i in -((kernel.height as isize) / 2)..=(kernel.height / 2) as isize {
                     for j in -((kernel.width as isize) / 2)..=(kernel.width / 2) as isize {
@@ -117,7 +118,6 @@ impl CanvasImage {
         buffer
     }
 
-
     #[allow(dead_code)]
     /// ONLY for greyscale and it zero pads, would usually doesn't make the output look too good
     fn greyscale_convolve_with_fft(&self, kernel: &Kernel) -> Vec<f64> {
@@ -128,8 +128,7 @@ impl CanvasImage {
         let r_access = |x, y| self.r(x, y);
         let mut image_complex: Vec<_> = iproduct!(0..new_height, 0..new_width)
             .map(|(x, y)| {
-                if (x <= self.horizontal_size() as usize) &&
-                    (y <= self.vertical_size() as usize) {
+                if (x <= self.horizontal_size() as usize) && (y <= self.vertical_size() as usize) {
                     let real = r_access(x as u32, y as u32).unwrap() as f64;
 
                     Complex::new(real, 0.0)
@@ -139,12 +138,10 @@ impl CanvasImage {
             })
             .collect();
 
-
         let kernel_access = |x, y| kernel.data[y as usize + x as usize * kernel.width];
         let mut kernel_complex: Vec<_> = iproduct!(0..new_height, 0..new_width)
             .map(|(x, y)| {
-                if (x <= kernel.width as usize) &&
-                    (y <= kernel.height as usize) {
+                if (x <= kernel.width as usize) && (y <= kernel.height as usize) {
                     let real = kernel_access(x as u32, y as u32);
 
                     Complex::new(real, 0.0)
@@ -153,7 +150,6 @@ impl CanvasImage {
                 }
             })
             .collect();
-
 
         let mut planner = FftPlanner::new();
         let fft = planner.plan_fft_forward(new_height * new_width);
@@ -193,7 +189,11 @@ impl CanvasImage {
 #[wasm_bindgen]
 impl Kernel {
     pub fn from_vec(data: Vec<f64>, width: usize, height: usize) -> Kernel {
-        Kernel { data, width, height }
+        Kernel {
+            data,
+            width,
+            height,
+        }
     }
 }
 
@@ -218,18 +218,13 @@ impl ops::Index<(isize, isize)> for Kernel {
     }
 }
 
-
 #[cfg(test)]
 mod test {
     use super::*;
 
     #[test]
     fn test_kernel() {
-        let kernel = Kernel::from_vec(vec![
-            9., 8., 7.,
-            6., 5., 4.,
-            3., 2., 1.,
-        ], 3, 3);
+        let kernel = Kernel::from_vec(vec![9., 8., 7., 6., 5., 4., 3., 2., 1.], 3, 3);
         assert_eq!(kernel[(0, 0)], 5.);
         assert_eq!(kernel[(-1, -1)], 9.);
         assert_eq!(kernel[(0, 1)], 4.);

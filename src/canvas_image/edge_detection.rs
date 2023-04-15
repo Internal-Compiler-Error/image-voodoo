@@ -1,13 +1,12 @@
 use crate::canvas_image::CanvasImage;
-use enum_iterator::Sequence;
-use itertools::{iproduct, izip};
-use num_traits::{abs_sub};
 use crate::convolution::{BorderStrategy, Kernel};
 use crate::image_index::reflective_indexed;
+use enum_iterator::Sequence;
+use itertools::{iproduct, izip};
+use num_traits::abs_sub;
+use rand::distributions::{Bernoulli, Distribution};
 use wasm_bindgen::prelude::*;
 use web_sys::ImageData;
-use rand::distributions::{Distribution, Bernoulli};
-
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Sequence)]
 enum Neighbour {
@@ -20,7 +19,6 @@ enum Neighbour {
     Bottom,
     BottomRight,
 }
-
 
 /// Iterator that returns pairs of opposing neighbours
 struct EightNeighbourIterator {
@@ -41,7 +39,6 @@ impl EightNeighbourIterator {
     }
 }
 
-
 impl Iterator for EightNeighbourIterator {
     type Item = ((i32, i32), (i32, i32));
 
@@ -54,24 +51,15 @@ impl Iterator for EightNeighbourIterator {
         let next = self.current;
         let (cur_x, cur_y) = (self.x, self.y);
 
-        let
-            ((x, y), (ops_x, ops_y)) = match next {
-            Neighbour::TopLeft =>
-                ((cur_x - 1, cur_y - 1), (cur_x + 1, cur_y + 1)),
-            Neighbour::Top =>
-                ((cur_x - 1, cur_y), (cur_x + 1, cur_y)),
-            Neighbour::TopRight =>
-                ((cur_x - 1, cur_y + 1), (cur_x + 1, cur_y - 1)),
-            Neighbour::Left =>
-                ((cur_x, cur_y - 1), (cur_x, cur_y + 1)),
-            Neighbour::Right =>
-                ((cur_x, cur_y + 1), (cur_x, cur_y - 1)),
-            Neighbour::BottomLeft =>
-                ((cur_x + 1, cur_y - 1), (cur_x - 1, cur_y + 1)),
-            Neighbour::Bottom =>
-                ((cur_x + 1, cur_y), (cur_x - 1, cur_y)),
-            Neighbour::BottomRight =>
-                ((cur_x + 1, cur_y + 1), (cur_x - 1, cur_y - 1)),
+        let ((x, y), (ops_x, ops_y)) = match next {
+            Neighbour::TopLeft => ((cur_x - 1, cur_y - 1), (cur_x + 1, cur_y + 1)),
+            Neighbour::Top => ((cur_x - 1, cur_y), (cur_x + 1, cur_y)),
+            Neighbour::TopRight => ((cur_x - 1, cur_y + 1), (cur_x + 1, cur_y - 1)),
+            Neighbour::Left => ((cur_x, cur_y - 1), (cur_x, cur_y + 1)),
+            Neighbour::Right => ((cur_x, cur_y + 1), (cur_x, cur_y - 1)),
+            Neighbour::BottomLeft => ((cur_x + 1, cur_y - 1), (cur_x - 1, cur_y + 1)),
+            Neighbour::Bottom => ((cur_x + 1, cur_y), (cur_x - 1, cur_y)),
+            Neighbour::BottomRight => ((cur_x + 1, cur_y + 1), (cur_x - 1, cur_y - 1)),
         };
 
         // if we are at the bottom right, we are done
@@ -82,11 +70,9 @@ impl Iterator for EightNeighbourIterator {
             None => self.done = true,
         }
 
-
         Some(((x, y), (ops_x, ops_y)))
     }
 }
-
 
 impl CanvasImage {
     /// ONLY for greyscale
@@ -97,11 +83,12 @@ impl CanvasImage {
     ///                  `abs(value) > threshold`
     /// # Returns
     ///  a new image where the edges are white and the rest is black
-    fn greyscale_laplacian_edges(convolved_image: &Vec<f64>,
-                                 width: u32,
-                                 height: u32,
-                                 threshold: f64) -> CanvasImage {
-
+    fn greyscale_laplacian_edges(
+        convolved_image: &Vec<f64>,
+        width: u32,
+        height: u32,
+        threshold: f64,
+    ) -> CanvasImage {
         // access the entire rgba pixel of the convolution image
         let pixel_access = |x, y| {
             let x = x as usize;
@@ -115,7 +102,6 @@ impl CanvasImage {
                 .nth(index)
                 .unwrap();
 
-
             Some([rgba[0], rgba[1], rgba[2], rgba[3]])
         };
 
@@ -123,12 +109,14 @@ impl CanvasImage {
 
         let rgba = iproduct!(0..height, 0..width)
             .map(|(y, x)| {
-                let neighbours = EightNeighbourIterator::new(x.try_into().unwrap(), y.try_into().unwrap());
+                let neighbours =
+                    EightNeighbourIterator::new(x.try_into().unwrap(), y.try_into().unwrap());
 
                 neighbours
                     .map(|((x, y), (ops_x, ops_y))| {
                         let [r, g, b, a] = pixel_reflect(x as i64, y as i64);
-                        let [r_ops, g_ops, b_ops, a_ops] = pixel_reflect(ops_x as i64, ops_y as i64);
+                        let [r_ops, g_ops, b_ops, a_ops] =
+                            pixel_reflect(ops_x as i64, ops_y as i64);
 
                         // test to see if each channel is an edge
                         [
@@ -140,20 +128,16 @@ impl CanvasImage {
                     })
                     // we consider a pixel is an edge as long as one or more direction crosses zero
                     .reduce(|[r1, g1, b1, a1], [r2, g2, b2, a2]| {
-                        [
-                            r1 || r2,
-                            g1 || g2,
-                            b1 || b2,
-                            a1 || a2,
-                        ]
-                    }).unwrap()
+                        [r1 || r2, g1 || g2, b1 || b2, a1 || a2]
+                    })
+                    .unwrap()
             })
             .flat_map(|[r, g, b, _a]| {
                 [
                     if r { 255 } else { 0 },
                     if g { 255 } else { 0 },
                     if b { 255 } else { 0 },
-                    255
+                    255,
                 ]
             });
 
@@ -161,7 +145,6 @@ impl CanvasImage {
 
         CanvasImage::from_vec_with_size(buffer, width, height)
     }
-
 
     /// Assuming the image has already gone through a type of gradient kernel, with x direction in `del_x` and y
     /// direction in `del_y`, now just mark the edge by if the magnitude of the gradient is greater than the
@@ -171,23 +154,24 @@ impl CanvasImage {
         height: u32,
         del_x: &Vec<f64>,
         del_y: &Vec<f64>,
-        threshold: u32) -> CanvasImage {
+        threshold: u32,
+    ) -> CanvasImage {
         assert_eq!(del_x.len(), del_y.len());
         // 4 channels in the del_x and del_y, one for each channel, so we need to multiply by 4
         assert_eq!((width * height) as usize * 4, del_x.len());
 
         let combined = Iterator::zip(
             del_x.as_slice().chunks_exact(4),
-            del_y.as_slice().chunks_exact(4));
+            del_y.as_slice().chunks_exact(4),
+        );
 
         let rgba = combined
             // calculate the magnitude of the gradient
             .map(|(x, y)| {
                 // you can't collect into an array because the size is not known at compile time
-                let magnitudes: Vec<_> =
-                    izip!(x.iter(), y.iter())
-                        .map(|(x, y)| x.abs() + y.abs())
-                        .collect();
+                let magnitudes: Vec<_> = izip!(x.iter(), y.iter())
+                    .map(|(x, y)| x.abs() + y.abs())
+                    .collect();
 
                 [magnitudes[0], magnitudes[1], magnitudes[2], magnitudes[3]]
             })
@@ -205,48 +189,38 @@ impl CanvasImage {
         CanvasImage::from_vec_with_size(buffer, width, height)
     }
 
-
     pub fn laplacian_edge(&self, threshold: f64) -> CanvasImage {
-        let kernel = Kernel::from_vec(vec![
-            1.0, 1.0, 1.0,
-            1.0, -8.0, 1.0,
-            1.0, 1.0, 1.0,
-        ], 3, 3);
+        let kernel = Kernel::from_vec(vec![1.0, 1.0, 1.0, 1.0, -8.0, 1.0, 1.0, 1.0, 1.0], 3, 3);
 
         let convolved = self.convolve(&kernel, BorderStrategy::Reflective);
 
-        let edge_map = CanvasImage::greyscale_laplacian_edges(&convolved, self.width, self.height, threshold);
+        let edge_map =
+            CanvasImage::greyscale_laplacian_edges(&convolved, self.width, self.height, threshold);
         edge_map
     }
 
     pub fn laplacian_of_gaussian_edge(&self, threshold: f64) -> CanvasImage {
-        let kernel = Kernel::from_vec(vec![
-            0.0, 0.0, -01.0, 0.0, 0.0,
-            0.0, -1.0, -02.0, -1.0, 0.0,
-            -1.0, -2.0, 16.0, -2.0, -1.0,
-            0.0, -1.0, -02.0, -1.0, 0.0,
-            0.0, 0.0, -01.0, 0.0, 0.0,
-        ], 5, 5);
+        let kernel = Kernel::from_vec(
+            vec![
+                0.0, 0.0, -01.0, 0.0, 0.0, 0.0, -1.0, -02.0, -1.0, 0.0, -1.0, -2.0, 16.0, -2.0,
+                -1.0, 0.0, -1.0, -02.0, -1.0, 0.0, 0.0, 0.0, -01.0, 0.0, 0.0,
+            ],
+            5,
+            5,
+        );
 
         let convolved = self.convolve(&kernel, BorderStrategy::Reflective);
 
-        let edge_map = CanvasImage::greyscale_laplacian_edges(&convolved, self.width, self.height, threshold);
+        let edge_map =
+            CanvasImage::greyscale_laplacian_edges(&convolved, self.width, self.height, threshold);
         edge_map
     }
 
     // TODO: add noise reduction and edge enhancement
     pub fn sobel_edge(&self, threshold: u32) -> CanvasImage {
-        let kernel_x = Kernel::from_vec(vec![
-            -1.0, 0.0, 1.0,
-            -2.0, 0.0, 2.0,
-            -1.0, 0.0, 1.0,
-        ], 3, 3);
+        let kernel_x = Kernel::from_vec(vec![-1.0, 0.0, 1.0, -2.0, 0.0, 2.0, -1.0, 0.0, 1.0], 3, 3);
 
-        let kernel_y = Kernel::from_vec(vec![
-            -1.0, -2.0, -1.0,
-            0.0, 0.0, 0.0,
-            1.0, 2.0, 1.0,
-        ], 3, 3);
+        let kernel_y = Kernel::from_vec(vec![-1.0, -2.0, -1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 1.0], 3, 3);
 
         let del_x = self.convolve(&kernel_x, BorderStrategy::Reflective);
         let del_y = self.convolve(&kernel_y, BorderStrategy::Reflective);
@@ -256,24 +230,15 @@ impl CanvasImage {
 
     // TODO: add noise reduction and edge enhancement
     pub fn prewitt_edge(&self, threshold: u32) -> CanvasImage {
-        let kernel_x = Kernel::from_vec(vec![
-            -1.0, 0.0, 1.0,
-            -1.0, 0.0, 1.0,
-            -1.0, 0.0, 1.0,
-        ], 3, 3);
+        let kernel_x = Kernel::from_vec(vec![-1.0, 0.0, 1.0, -1.0, 0.0, 1.0, -1.0, 0.0, 1.0], 3, 3);
 
-        let kernel_y = Kernel::from_vec(vec![
-            -1.0, -1.0, -1.0,
-            0.0, 0.0, 0.0,
-            1.0, 1.0, 1.0,
-        ], 3, 3);
+        let kernel_y = Kernel::from_vec(vec![-1.0, -1.0, -1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0], 3, 3);
 
         let del_x = self.convolve(&kernel_x, BorderStrategy::Reflective);
         let del_y = self.convolve(&kernel_y, BorderStrategy::Reflective);
 
         CanvasImage::gradient_edge_localization(self.width, self.height, &del_x, &del_y, threshold)
     }
-
 
     /// Set noise to the image by performing a bernoulli trial for each pixel with probability p. If the trial succeeds,
     /// `noise` is *set* as the pixel for *all* color channels.
@@ -283,8 +248,7 @@ impl CanvasImage {
         let bernoulli = Bernoulli::new(p)?;
 
         // for each pixel, perform a bernoulli trial with probability p, if true, set pixel to noise
-        self
-            .rgba_iter_mut()
+        self.rgba_iter_mut()
             .filter(|_| bernoulli.sample(&mut rng))
             .for_each(|(r, g, b, _a)| {
                 *r = noise;
@@ -321,16 +285,14 @@ pub fn laplacian_of_gaussian_edge(image: ImageData, threshold: f64) -> ImageData
 #[wasm_bindgen]
 pub fn add_salt(image: ImageData, p: f64) -> Result<ImageData, String> {
     let mut image = CanvasImage::from_image_data(image);
-    image.add_salt(p)
-        .map_err(|e| e.to_string())?;
+    image.add_salt(p).map_err(|e| e.to_string())?;
     Ok(image.into())
 }
 
 #[wasm_bindgen]
 pub fn add_pepper(image: ImageData, p: f64) -> Result<ImageData, String> {
     let mut image = CanvasImage::from_image_data(image);
-    image.add_pepper(p)
-        .map_err(|e| e.to_string())?;
+    image.add_pepper(p).map_err(|e| e.to_string())?;
     Ok(image.into())
 }
 
@@ -348,13 +310,11 @@ pub fn sobel_edge(image: ImageData, threshold: f64) -> ImageData {
     edge_map.into()
 }
 
-
 #[cfg(test)]
 mod tests {
-    use image::{ImageBuffer, Rgba};
-    use crate::canvas_image::CanvasImage;
     use crate::canvas_image::edge_detection::EightNeighbourIterator;
-
+    use crate::canvas_image::CanvasImage;
+    use image::{ImageBuffer, Rgba};
 
     #[test]
     fn laplacian_sanity() {
@@ -377,7 +337,7 @@ mod tests {
             edge_map.vertical_size(),
             edge_map.rgba_slice().clone(),
         )
-            .unwrap();
+        .unwrap();
         image.save("laplacian.png").unwrap();
     }
 
@@ -402,10 +362,9 @@ mod tests {
             edge_map.vertical_size(),
             edge_map.rgba_slice().clone(),
         )
-            .unwrap();
+        .unwrap();
         image.save("laplacian_of_gaussian.png").unwrap();
     }
-
 
     #[test]
     fn sanity() {
