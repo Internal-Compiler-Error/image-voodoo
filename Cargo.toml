@@ -6,8 +6,7 @@ edition = "2021"
 description = "WASM image processing library"
 repository = "https://github.com/Internal-Compiler-Error/image-voodoo"
 
-# not because I dislike free software, but rather stupid school rules.
-license = "proprietary"
+license = "MIT"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -57,5 +56,4 @@ wasm-bindgen-test = "0.3.34"
 wasm-rs-dbg = "0.1.2"
 
 [profile.release]
-# Tell `rustc` to optimize for small code size.
-opt-level = "s"
+opt-level = 3
